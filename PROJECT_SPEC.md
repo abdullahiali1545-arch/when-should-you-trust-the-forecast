@@ -2,7 +2,7 @@
 
 **Prospective detection of air-quality forecast unreliability in London, and whether routing distrusted forecasts to a simpler fallback produces a better system.**
 
-`PROJECT_SPEC.md` — v2.0, 17 August 2026. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
+`PROJECT_SPEC.md` — v2.0, 17 August 2026. Amended 20 August 2026; see the Changelog at the end. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
 
 ---
 
@@ -30,7 +30,7 @@ The forecaster is scaffolding. The watcher and the routing policy are the projec
 
 | ID | Hypothesis | Status |
 |---|---|---|
-| **H1** | Forecast errors rise during documented shift periods (COVID lockdown; ULEZ expansions) | Sanity check on the instrument. **Not a finding.** |
+| **H1** | Forecast errors rise during the COVID lockdown period | Sanity check on the instrument. **Not a finding.** |
 | **H2** | Past-only indicators predict elevated future error **beyond what R1 and R2 achieve** (Part 9) | **The core hypothesis** |
 | **H3** | Routing distrusted forecasts to a fallback lowers total error at 100% coverage, vs always-ML and vs always-fallback | **The headline result** |
 | **H4** | A watcher trained on some stations transfers to unseen stations (leave-one-station-out) | Generalisation |
@@ -137,13 +137,26 @@ Read these and accept them before starting.
 
 | Source | What | Access |
 |---|---|---|
-| AURN (via `pyaurn`) | Hourly NO₂, PM2.5, PM10, 2018–present | `importAURN`, `importMeta` |
+| AURN (via `rdata`) | Hourly NO₂, PM2.5, PM10, 2018–present | DEFRA openair `.RData` URLs, read directly |
 | Open-Meteo archive (`/v1/archive`) | Hourly ERA5 weather matched by station lat/lon | Free, no key |
 
 ```python
-from pyaurn import importAURN, importMeta
-metadata = importMeta()                       # site codes, coords, site types
-data = importAURN("MY1", range(2018, 2026))   # Marylebone Road, kerbside
+# AURN ingestion via `rdata`. See the Changelog (2026-08-20) for why not pyaurn.
+# Verified 2026-08-20: MY1_2024 returns 8,784 rows x 43 columns.
+import urllib.request, pathlib, pandas as pd, rdata
+
+def load_aurn(site: str, year: int) -> pd.DataFrame:
+    url = f"https://uk-air.defra.gov.uk/openair/R_data/{site}_{year}.RData"
+    tmp = pathlib.Path(f"{site}_{year}.RData")            # a plain Path, NOT
+    tmp.write_bytes(urllib.request.urlopen(url).read())   # NamedTemporaryFile —
+    df = rdata.read_rda(tmp)[f"{site}_{year}"]            # Windows holds an
+    df["date"] = pd.to_datetime(df["date"], unit="s", utc=True)  # exclusive lock
+    return df                                    # date arrives as float64 epoch s
+
+# Site metadata — the importMeta() equivalent. Verified 2026-08-20: 3,076 rows
+# x 13 cols. Columns: site_id, site_name, location_type, latitude, longitude,
+# parameter, Parameter_name, start_date, end_date, ratified_to, zone, agglomeration
+#   https://uk-air.defra.gov.uk/openair/R_data/AURN_metadata.RData
 ```
 
 ```
@@ -151,14 +164,18 @@ https://archive-api.open-meteo.com/v1/archive?latitude=51.52&longitude=-0.15
   &start_date=2018-01-01&end_date=2025-12-31
   &hourly=temperature_2m,relative_humidity_2m,pressure_msl,
           wind_speed_10m,wind_direction_10m,boundary_layer_height
-  &timezone=UTC
+  &timezone=UTC&wind_speed_unit=ms
 ```
+
+**`wind_speed_unit=ms` is not optional.** Open-Meteo returns km/h by default. Omit it and every u/v component is 3.6× too large — nothing errors, F3 barely notices because trees are scale-invariant, but the distribution-distance features and every physical statement in the write-up are wrong. Assert on the returned `hourly_units` in `src/ingest.py` rather than trusting the default.
+
+**Never branch on the API's `error` field.** Open-Meteo returns rate-limit failures and genuine bad-variable failures with the same `{"error": true, ...}` shape. Read `reason`: retry with backoff on a rate limit, fail loudly on anything else.
 
 ### Station selection is scripted, not chosen by hand
 
 Do **not** hardcode a station list from memory. Write `src/select_stations.py` that:
 
-1. Pulls `importMeta()`, filters to Greater London AURN sites.
+1. Pulls `AURN_metadata.RData` (see above), filters to Greater London AURN sites.
 2. Pulls 2018–2025 for each candidate.
 3. Computes hourly coverage for PM2.5 and NO₂ per site.
 4. Keeps sites with **≥80% coverage**; drops the rest.
@@ -177,11 +194,15 @@ Pull one station across **25 October 2020** (the BST→GMT transition) and count
 - **24 rows** → data is already GMT/UTC. Do nothing but `tz_localize('UTC')`.
 - **25 rows, or a duplicated 01:00** → data is local London time. Then and only then convert.
 
+Control, measured 2026-08-20: Open-Meteo's archive with `timezone=UTC` returns exactly 24 rows for 2020-10-25, a single 01:00, spanning 00:00 to 23:00. So the weather side is confirmed UTC-clean and any 25th row on the AURN side is real.
+
 Write the result and the row count into `docs/ingest_checks.md`. Get this wrong and every diurnal feature silently shifts by an hour for half the year — the kind of bug that never announces itself and quietly poisons everything downstream.
 
 ### Data freshness — measure it now
 
 Pull the current year and find the timestamp of the most recent non-null observation. Record the lag in `docs/ingest_checks.md`. This number decides whether the live scoreboard (Part 12) is feasible from AURN or needs the LAQN API instead. **Do this in Week 1, not Week 6.**
+
+It is also an honesty constraint on the headline result: residual features assume the truth at `s+6h` is available at `s+6h`. If the measured publication lag is N hours, a live deployment carries N hours less residual information than the backtest. State that in the README.
 
 ### Imputation
 
@@ -190,7 +211,7 @@ Pull the current year and find the timestamp of the most recent non-null observa
 
 ### Ratification
 
-Reference data is ratified annually, usually the following April. Recent data is provisional and can change. **Pin a snapshot date, record it in the README, and re-pull only deliberately.**
+Reference data is ratified annually, usually the following April. Recent data is provisional and can change. **Pin a snapshot date, record it in the README, and re-pull only deliberately.** `AURN_metadata.RData` carries a `ratified_to` column per site — use it rather than guessing.
 
 ---
 
@@ -218,6 +239,8 @@ Target: **PM2.5 at t+6h**, single horizon. Multi-horizon is phase two and stays 
 **Do not rank by raw absolute error.** Absolute error scales with concentration: predicting 40 when truth is 55 gives an error of 15; predicting 12 when truth is 15 gives 3. Rank raw errors and your "unreliable" class silently becomes "high pollution episodes" — the watcher would then be solving a different, easier, already-solved problem, H2 would appear to succeed, and the success would be meaningless.
 
 **Primary definition — stratified.** Bin cases by *predicted* concentration (deciles). Within each bin, the top 20% of absolute errors are labelled unreliable. Bins come from predicted, not actual, values — actual values are not available at prediction time.
+
+**Thresholds are fitted parameters.** Both the decile edges and the within-bin 80th percentile are estimated from data, so both are fitted on training folds only and applied frozen to the test fold. See Part 10.
 
 **Robustness check — relative error.** `|y − ŷ| / max(ŷ, floor)`, floor chosen to stop small denominators exploding. Re-run the headline result under this definition. If the conclusion flips, that is itself a finding and belongs in the README.
 
@@ -290,6 +313,15 @@ Information used at time *t* ⊆ information available by time *t*. Specifically
 - Distribution distances computed against the training window, not the full series.
 - Residual features only from timestamps whose outcome has already occurred.
 - No future weather in Mode B — including "today's" weather at hour t+3.
+- **The watcher trains only on out-of-fold F3 residuals.** In-sample residuals are systematically too small and differently shaped. Consequence: the watcher's first scoreable fold is one behind F3's — one quarter of burn-in.
+- **Stratified-label thresholds are fitted on training folds and applied frozen** to the test fold. The realised positive rate in a test fold will therefore drift from 20%; that drift is reported, not corrected — it measures shift in the error process.
+- **The fold test.** Any feature whose value at a fixed timestamp would change if a fold boundary moved is built inside the walk-forward harness, not in `src/features.py`. This covers scalers, climatology means, model disagreement, residual features, distribution distances and label thresholds. See `docs/information_contract.md`.
+
+### The canary test
+
+Correct output and leaked output look identical — both produce a fold table with plausible MAEs, no error, no warning. So the harness cannot be validated by inspecting its output.
+
+Corrupt one input series at a single timestamp `t*` with a sentinel value, rebuild the features, and assert that every row with origin earlier than `t*` is bit-identical to before. If an earlier row changed, information moved backwards in time. Run it on the label-construction function too, not just the features. Build it in the same session as the harness.
 
 ---
 
@@ -376,14 +408,14 @@ ULEZ stress test · multiple forecast horizons · neural networks · seven noteb
 | 1 | Domain one-pager (see Part 16). Timezone check. Freshness check. Both written to `docs/ingest_checks.md` |
 | 2 | `src/ingest.py`: AURN + Open-Meteo → Parquet. UTC throughout |
 | 3 | `src/select_stations.py` → `docs/station_selection.md`. Coverage audit decides 4, 5 or 6 stations |
-| 4 | `src/features.py`: lags, rolling stats, u/v wind, calendar features |
+| 4 | `src/features.py`: lags, rolling stats, u/v wind, calendar features. **Fold-independent features only** — see Part 10 |
 | 5 | `sql/schema.sql` written (not yet deployed). EDA notebook: diurnal cycles, seasonality, missingness map |
 
-**Done when:** one command loads clean, UTC-correct, feature-engineered data for every surviving station.
+**Done when:** one command loads clean, UTC-correct, feature-engineered data for every surviving station, and `docs/information_contract.md` names every deferred feature with the fold dependency that deferred it.
 
 ### Week 2 — Forecaster and harness
 
-- Walk-forward harness in `src/evaluate.py` — build this before any model, because everything downstream depends on it being right
+- Walk-forward harness in `src/evaluate.py` — build this before any model, because everything downstream depends on it being right. Canary test first
 - F0, F1, F2 implemented and scored
 - F3 (LightGBM) implemented and scored
 - Mode A vs Mode B comparison → the optimism-gap figure
@@ -455,18 +487,22 @@ If you can explain that unaided, you understand distribution shift better than m
 when-should-you-trust-the-forecast/
 ├── README.md                      ← the product
 ├── PROJECT_SPEC.md                ← this file, committed first
+├── environment.yml                ← conda interpreter
+├── requirements.txt               ← pip packages
 ├── docs/
 │   ├── ingest_checks.md           ← timezone + freshness results
+│   ├── information_contract.md    ← what each model may read at time t
 │   ├── station_selection.md       ← coverage audit, including rejections
+│   ├── session_log.md             ← continuity between working sessions
 │   └── data_audit.md              ← the AERONET audit; a killed hypothesis is evidence
 ├── src/
 │   ├── ingest.py
 │   ├── select_stations.py
-│   ├── features.py
+│   ├── features.py                ← fold-independent features only
 │   ├── forecast.py                ← F0–F3
 │   ├── watcher.py                 ← features + classifier
 │   ├── routing.py                 ← R0–R3, fallback policy
-│   └── evaluate.py                ← walk-forward, risk–coverage, bootstrap
+│   └── evaluate.py                ← walk-forward, canary test, risk–coverage, bootstrap
 ├── notebooks/
 │   ├── 01_exploration.ipynb       ← scratchpad, not a deliverable
 │   ├── 02_baselines.ipynb
@@ -491,6 +527,7 @@ Notebooks are where you think. `src/` is what you are judged on.
 | Postgres setup consumes days | Medium | Deferred to Week 5; Parquet works throughout |
 | Live scoreboard blocked by data lag | Unknown until Week 1 | Freshness check in Part 6; LAQN API as fallback source |
 | Scope creep from something that "sounds impressive" | High | Part 14 CUT list. Adding to it requires deleting something else |
+| Silent leakage in the harness | High | Canary test, Part 10. Correct and leaked output are visually identical |
 
 ---
 
@@ -511,3 +548,41 @@ These were decided on evidence. Reopening them costs time and changes nothing.
 > I built a London air-quality forecaster and a second system that tries to recognise, before the truth arrives, when the first one is about to be wrong — then routed the distrusted cases to a simple fallback and tested, with confidence intervals, whether the combined system beats always using the model, and whether it beats the trivial rule of just switching whenever pollution is high or the last forecast was bad.
 
 That last clause is the one that makes it an experiment.
+
+---
+
+## Changelog
+
+Amendments after the initial commit (f198a05, 2026-08-17). Each entry states whether results bearing on the decision had been seen at the time.
+
+Parts 3, 15 and the residual concerns still refer to `pyaurn`. That text is left standing deliberately: it records what was believed on 17 August and what Phase 0 actually did. Body text is amended where stale wording would cause the wrong action; it is left alone where it is history.
+
+### 2026-08-20 — Data access (plumbing; no results seen)
+
+Part 5's `pyaurn.importAURN` route did not work in this environment against the current DEFRA files. pyaurn is unmaintained: last release 0.1.21, 2023-03-10. Proximate cause: DEFRA serves RDX3-serialised `.RData`, which the reader in pyaurn's `pyreadr` dependency did not read here. Note this was pyreadr 0.5.6 (released 2026-04-13, the current version), so the failure is not a matter of a stale reader.
+
+Ingestion reimplemented with the pure-Python `rdata` package (1.1.0) reading DEFRA URLs directly. Part 5's source table and code block updated to match. Verified 2026-08-20: `MY1_2024.RData` returns 8,784 rows × 43 columns; `AURN_metadata.RData` returns 3,076 rows × 13 columns and serves as the `importMeta()` replacement for `src/select_stations.py`. Hypotheses, metrics and analysis plan unchanged.
+
+### 2026-08-20 — H1 narrowed (pre-registered content; no results seen)
+
+ULEZ struck from H1. H1 now reads: *Forecast errors rise during the COVID lockdown period.*
+
+Reasons: Part 14 already CUTs the ULEZ stress test, so the original wording contradicted the scope control. ULEZ's effect on PM2.5 specifically is weak and contested — non-exhaust brake and tyre wear dominates kerbside PM2.5 and a low-emission zone does little about it. Its effect also cannot easily be separated from concurrent trends. H1 exists as a sanity check on the instrument, and a sanity check with a weak expected signal cannot function as a sanity check.
+
+### 2026-08-20 — Three leakage rules added to Part 10 (clarification; no results seen)
+
+Part 10 previously mandated walk-forward evaluation and per-fold refitting but did not say where the watcher's training labels come from, nor where the stratified-label thresholds are fitted. Both gaps admit leakage that produces plausible output and no error.
+
+(a) The watcher trains only on out-of-fold F3 residuals. Consequence: its first scoreable fold is one behind F3's — one quarter of burn-in.
+
+(b) Stratified-label thresholds — decile edges of predicted concentration, and the within-bin 80th percentile of absolute error — are fitted on training folds and applied frozen to the test fold. The realised positive rate in a test fold will therefore drift from 20%; that drift is reported, not corrected.
+
+(c) The fold test: any feature whose value at a fixed timestamp would change if a fold boundary moved is built inside the walk-forward harness, not in `src/features.py`. Three of the watcher's four feature families fall on the harness side. See `docs/information_contract.md`.
+
+Also added to Part 10: the canary test, as the validation method for the harness itself.
+
+### 2026-08-20 — Open-Meteo request parameters (plumbing; no results seen)
+
+`wind_speed_unit=ms` added to the Part 5 request. Open-Meteo defaults to km/h; omitting the parameter makes every u/v component 3.6× too large with no error raised. `src/ingest.py` asserts on the returned `hourly_units` rather than trusting the default, and keys its retry logic on the `reason` field, since rate-limit and bad-variable failures share the same `{"error": true}` shape.
+
+`boundary_layer_height` verified working on `/v1/archive` for 2018 at MY1's coordinates, returning metres. The earlier failure was a rate-limit response misread as an unsupported variable.
