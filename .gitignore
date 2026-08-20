@@ -1,1 +1,7 @@
-*.RData 
+.idea/
+data/
+*.parquet
+*.RData
+__pycache__/
+.ipynb_checkpoints/
+.env
