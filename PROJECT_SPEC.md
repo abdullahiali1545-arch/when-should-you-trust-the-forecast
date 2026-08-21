@@ -2,7 +2,7 @@
 
 **Prospective detection of air-quality forecast unreliability in London, and whether routing distrusted forecasts to a simpler fallback produces a better system.**
 
-`PROJECT_SPEC.md` — v2.0, 17 August 2026. Amended 20 August 2026; see the Changelog at the end. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
+`PROJECT_SPEC.md` — v2.0, 17 August 2026. Amended 20–21 August 2026; see the Changelog at the end. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
 
 ---
 
@@ -189,14 +189,22 @@ Target 5–6 surviving stations spanning kerbside / urban background / suburban 
 
 ### Timezone — verify, do not assume
 
-Pull one station across **25 October 2020** (the BST→GMT transition) and count rows in that local day.
+Pull one station across both 2020 clock changes — **29 March** (GMT→BST) and **25 October** (BST→GMT) — and inspect the **raw epoch-seconds `date` column**, not the rendered timestamps. Test whether consecutive raw values differ by a constant 3600 across each transition.
 
-- **24 rows** → data is already GMT/UTC. Do nothing but `tz_localize('UTC')`.
-- **25 rows, or a duplicated 01:00** → data is local London time. Then and only then convert.
+- **Constant 3600 throughout, no repeated or out-of-order values** → genuine UTC instants. Do nothing but `tz_localize('UTC')`.
+- **A 7200 step at the March transition, or a repeated or out-of-order value at the October one** → local wall-clock time encoded as if UTC. Then and only then convert.
 
-Control, measured 2026-08-20: Open-Meteo's archive with `timezone=UTC` returns exactly 24 rows for 2020-10-25, a single 01:00, spanning 00:00 to 23:00. So the weather side is confirmed UTC-clean and any 25th row on the AURN side is real.
+**March is the load-bearing test.** The two transitions are not symmetric. On 29 March a local-encoded series never carries the `01:00` label, because the clock jumps from 01:00 GMT to 02:00 BST — a *skipped* label, which opens a 7200 gap. On 25 October the `01:00` label is *repeated*, not skipped, so no gap can open there. March therefore fires whatever the provider does in October; October's repeat is corroboration, not a second independent test.
 
-Write the result and the row count into `docs/ingest_checks.md`. Get this wrong and every diurnal feature silently shifts by an hour for half the year — the kind of bug that never announces itself and quietly poisons everything downstream.
+Two provider conventions produce no step signature at all, and both must be checked for rather than assumed absent. If October's repeated hour is **de-duplicated**, October's labels run 00, 01, 02 … at a constant 3600 with nothing to see. If March's missing hour is **padded with an all-null row** to preserve a regular grid, March reads 3600 throughout as well. So alongside the step diffs, record rows-per-day and the null rate for both transition dates. If the step test comes back silent on both, it has not confirmed UTC — it has failed to discriminate, and the diurnal-alignment check below is the only remaining evidence.
+
+**Do not count rows in the local day.** The local day of 25 October 2020 is genuinely 25 hours long, so correctly-stored UTC data also yields 25 rows for it. That count cannot discriminate, and reading 25 as evidence of local storage would trigger the exact conversion this check exists to prevent. The annual row count is equally useless: a local-time year loses an hour in spring and gains one in autumn, netting to 8,784 in a leap year either way.
+
+Control, measured 2026-08-20: Open-Meteo's archive with `timezone=UTC` returns exactly 24 rows for the UTC calendar date 2020-10-25, a single 01:00, spanning 00:00 to 23:00. The weather side is UTC-clean, and the slicing convention is by UTC calendar date.
+
+Second, independent check: group by hour of day for one summer and one winter month and compare mean PM2.5. Correct handling → the morning peak aligns across both. One hour of misalignment → something shifted.
+
+Write both results into `docs/ingest_checks.md` §1. Get this wrong and every diurnal feature silently shifts by an hour for half the year — the kind of bug that never announces itself and quietly poisons everything downstream.
 
 ### Data freshness — measure it now
 
@@ -586,3 +594,25 @@ Also added to Part 10: the canary test, as the validation method for the harness
 `wind_speed_unit=ms` added to the Part 5 request. Open-Meteo defaults to km/h; omitting the parameter makes every u/v component 3.6× too large with no error raised. `src/ingest.py` asserts on the returned `hourly_units` rather than trusting the default, and keys its retry logic on the `reason` field, since rate-limit and bad-variable failures share the same `{"error": true}` shape.
 
 `boundary_layer_height` verified working on `/v1/archive` for 2018 at MY1's coordinates, returning metres. The earlier failure was a rate-limit response misread as an unsupported variable.
+
+### 2026-08-21 — Part 6 timezone test rewritten (correction; no results seen)
+
+The v2.0 test — "count rows in that local day; 24 → UTC, 25 → local" — cannot discriminate as worded. The local day of 25 October 2020 contains 25 real hours, so a correctly-stored UTC series sliced by that local day also returns 25 rows. Under the stated rule that reads as evidence of local storage, and would trigger the timezone conversion the check exists to prevent. The test is sound only if "that local day" is read as "that UTC calendar date", which the wording does not say.
+
+Replaced with a test on the raw epoch-seconds column: consecutive differences constant at 3600 across both 2020 transitions → UTC; a repeated value at the October transition, or a 7200 step at the March one → local wall clock. This is unambiguous under either slicing convention. The diurnal-alignment comparison is added as a second, independent line of evidence, since the raw-step test establishes what the data is but not whether the handling of it is correct.
+
+The Part 6 control paragraph is retained, with its slicing convention stated explicitly as UTC calendar date.
+
+Written before the check was run. No AURN timezone result had been seen.
+
+### 2026-08-21 — Part 6 failure conditions completed (correction; no results seen)
+
+The entry above paired a repeated epoch value at the October transition with a 7200 step at the March one, and implicitly treated the two as symmetric tests. They are not, and two gaps followed.
+
+First, only March can produce a gap. A local-encoded series skips the `01:00` label on 29 March, so a 7200 step appears whatever the provider does in October, where the label is repeated rather than skipped. March is load-bearing; October corroborates. An earlier draft of this entry proposed widening the October condition to include a 7200 step, on the reasoning that providers which drop the repeated hour would produce one. That reasoning is wrong: dropping the repeat yields a contiguous 24-label day at a constant 3600 and no signature whatsoever.
+
+Second, and this is the real gap, two conventions defeat the step test entirely — de-duplicating October's repeated hour, and padding March's missing hour with an all-null row. Under either, the affected transition reads as clean UTC. Part 6 now requires rows-per-day and null rate on both transition dates alongside the step diffs, and states explicitly that a silent step test is a failure to discriminate rather than a confirmation of UTC, leaving the diurnal-alignment check as the only remaining evidence.
+
+Out-of-order (negative) steps added as a third local-clock signature. A logger whose clock is set to local time can emit timestamps that run backwards at the October transition. `diff()` already computes this, so the check is free.
+
+Written before the check was run.
