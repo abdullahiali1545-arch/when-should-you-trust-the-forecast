@@ -184,3 +184,89 @@ or a headline metric — but the distinction is recorded rather than glossed.
    this is a change of diagnostic instrument only.
 
 Both folded into `PROJECT_SPEC.md` Part 6 and its Changelog on 26 August 2026.
+
+## §2 — Data freshness / publication lag (W1.4)
+
+**Run:** 26 August 2026, 14:00 UTC. **Station:** MY1. **File:** `MY1_2026.RData`
+(5,688 rows × 43 cols). **Snapshot date pinned:** 2026-08-26.
+
+### Verdict
+
+**Publication lag is 15 h, measured at 14:00 UTC. Both pollutants are fresh
+together, so this is a genuine pipeline property, not an instrument outage.**
+
+**The lag exceeds the 6-hour forecast horizon.** A forecast made from the
+freshest available observation targets a time already 9 h in the past. AURN
+therefore cannot support the forward-looking half of spec Part 12 — today's
+forecast and its trust flag. It fully supports the retrospective half: a rolling
+scoreboard of how the watcher's past calls turned out, scored after the fact,
+which is the component Part 12 argues for. A genuinely live forecast page would
+need Imperial's LAQN API (Part 3, residual concern 3). Decision deferred to
+Week 6; the condition's outcome is recorded here.
+
+### Measurements
+
+| Pollutant | Last non-null (UTC) | Lag | Coverage, trailing 30 d |
+|---|---|---|---|
+| PM2.5 | 2026-08-25 23:00 | 15.0 h | 97.1% |
+| NO₂ | 2026-08-25 23:00 | 15.0 h | 93.9% |
+
+### The lag is a daily batch, not a rolling feed
+
+The file ends at 23:00 UTC — the end of a UTC day, not an arbitrary recent hour.
+DEFRA publishes in daily batches. The measured 15 h is therefore a snapshot of a
+value that cycles: at 23:00 UTC the same file would read ~24 h stale.
+
+Confirmed directly by a second run at 14:35 UTC, 37 minutes after the first. The
+last non-null timestamp was unchanged at 2026-08-25 23:00, and the lag had grown
+by exactly the elapsed time, 15.0 h → 15.6 h. No data arrived in the interval. A
+rolling feed would have advanced; a batch feed does not, and this one did not.
+
+The batch containing 25 August had arrived by 13:58 on 26 August, so it lands
+somewhere in 00:00–13:58 UTC. Nothing for 26 August was published as of 14:35,
+so the batch covers a complete UTC day and is issued only after that day closes.
+Worst case at any hour is therefore **≤ 39 h** (15 + 24).
+
+**Remaining unknown:** the batch hour itself is not pinned. A run early one
+morning would bracket it. Not required for any decision currently open.
+
+### Why two pollutants
+
+PM2.5 and NO₂ come off different instruments but share a publication pipeline. A
+single-pollutant measurement cannot separate a slow pipeline from a dead sensor —
+both present as a large lag. Measured together they can: stale-together indicates
+the pipeline, stale-alone indicates the instrument. MY1's autumn 2020 PM2.5
+outage (§1.1) makes this a live possibility rather than a hypothetical.
+
+Identical 15.0 h lags on both confirm the pipeline explanation.
+
+### Consequence for the headline result
+
+Residual features assume the truth at `s+6h` is available at `s+6h`. It is
+available at `s+6h+N`. A deployed watcher therefore runs on **15–39 h staler**
+residual information than the backtested one, depending on time of day.
+
+This is **not leakage** — the backtest uses only genuinely past values. It is a
+deployment gap, and spec Part 6 requires it be stated in the README with a number
+rather than a caveat.
+
+### Incidental
+
+**Current-year file is truncated, not padded.** Last row timestamp equals last
+non-null reading (2026-08-25 23:00). 5,688 rows = 237 × 24 exactly, for 1 January
+to 25 August inclusive — still the complete regular grid found in §1, cut at the
+last published hour rather than extended to 31 December. `date.max()` happens to
+be correct here, but only by coincidence of convention; §2 measures the last
+non-null regardless.
+
+**MY1 PM2.5 is currently healthy.** 97.1% over the trailing 30 days, above NO₂'s
+93.9%. Evidence that the 78.7% figure for 2020 (§1.1) reflects one contiguous
+instrument outage rather than a chronically unreliable site. Carry to W1.6.
+
+**Schema drift, continued.** Column counts by year at MY1: 2019 = 51, 2020 = 49,
+2024 = 43, 2026 = 43. `src/ingest.py` must reconcile columns explicitly.
+
+### Reproduce
+
+`src/freshness_check.py`. Re-running gives a different lag — the value above is a
+snapshot at the pinned date and stands unless a re-pull is recorded here.
