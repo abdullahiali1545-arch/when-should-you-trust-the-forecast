@@ -116,7 +116,7 @@ In UTC hours the same comparison gives 06→07 for February and **05→06** for 
 — one hour apart, which is what BST = UTC+1 requires. February's local and UTC
 columns are byte-identical, as expected for a GMT month.
 
-**Both lines of evidence agree.**
+**All three lines of evidence agree.**
 
 ### Reproduce
 
@@ -182,3 +182,5 @@ or a headline metric — but the distinction is recorded rather than glossed.
    reporting noise and could not have distinguished a one-hour bug from a
    one-hour seasonal effect. PM2.5 remains the forecasting target throughout;
    this is a change of diagnostic instrument only.
+
+Both folded into `PROJECT_SPEC.md` Part 6 and its Changelog on 26 August 2026.

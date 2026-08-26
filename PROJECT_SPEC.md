@@ -2,7 +2,7 @@
 
 **Prospective detection of air-quality forecast unreliability in London, and whether routing distrusted forecasts to a simpler fallback produces a better system.**
 
-`PROJECT_SPEC.md` — v2.0, 17 August 2026. Amended 20–21 August 2026; see the Changelog at the end. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
+`PROJECT_SPEC.md` — v2.0, 17 August 2026. Amended 20–26 August 2026; see the Changelog at the end. Commit this first. Do not edit it after Week 1 except to record decisions with dates.
 
 ---
 
@@ -202,7 +202,11 @@ Two provider conventions produce no step signature at all, and both must be chec
 
 Control, measured 2026-08-20: Open-Meteo's archive with `timezone=UTC` returns exactly 24 rows for the UTC calendar date 2020-10-25, a single 01:00, spanning 00:00 to 23:00. The weather side is UTC-clean, and the slicing convention is by UTC calendar date.
 
-Second, independent check: group by hour of day for one summer and one winter month and compare mean PM2.5. Correct handling → the morning peak aligns across both. One hour of misalignment → something shifted.
+Second, independent check — diurnal alignment. Group by **hour of day in `Europe/London`**, not UTC, for one GMT month and one BST month, and compare the hourly **NO₂** profile. The clock matters: human activity follows local time, so under correct UTC storage the local-hour profiles align while the UTC-hour profiles sit one hour apart. Applying the pass condition to UTC hours would fail correct data — the exact inversion this check exists to prevent.
+
+Use the **steepest hour-on-hour morning rise**, not the morning peak. Neither pollutant peaks in the morning at MY1; both climb into the late afternoon, so an `idxmax` over a morning window returns the window edge rather than a feature. Use NO₂ rather than PM2.5: kerbside NO₂ is close to pure traffic exhaust and gives a sharp, human-scheduled ramp, whereas kerbside PM2.5 is dominated by non-exhaust wear and regional secondary aerosol and carries almost no diurnal structure. PM2.5 remains the forecasting target; this is the diagnostic instrument only.
+
+Same rise hour in both months → aligned. One hour of misalignment → something shifted.
 
 Write both results into `docs/ingest_checks.md` §1. Get this wrong and every diurnal feature silently shifts by an hour for half the year — the kind of bug that never announces itself and quietly poisons everything downstream.
 
@@ -616,3 +620,13 @@ Second, and this is the real gap, two conventions defeat the step test entirely 
 Out-of-order (negative) steps added as a third local-clock signature. A logger whose clock is set to local time can emit timestamps that run backwards at the October transition. `diff()` already computes this, so the check is free.
 
 Written before the check was run.
+
+### 2026-08-26 — Part 6 diurnal-alignment check respecified (correction; **results seen**)
+
+Unlike every entry above, this one was written **after** the data had been inspected. The check ran on 21 August against MY1 2019 and 2020, and both amendments below were made *because* the profiles had been looked at. They change a diagnostic instrument, not a hypothesis, a label definition or a headline metric — but the distinction is tagged rather than glossed.
+
+(a) **Hour of day is grouped in `Europe/London`, not UTC.** Part 6 said "group by hour of day" without naming the clock. AURN timestamps are true UTC instants (verified; `docs/ingest_checks.md` §1), while the signal under test is human activity, which follows the local clock. Under correct storage the local-hour profiles align across a GMT and a BST month and the UTC-hour profiles sit one hour apart — so applying Part 6's stated pass condition to UTC hours would fail correct data, the exact inversion the check exists to prevent. Consistent with `docs/information_contract.md`, which already derives calendar features in `Europe/London`.
+
+(b) **The check uses NO₂ and the steepest hour-on-hour morning rise**, not PM2.5 and the morning peak. Neither pollutant peaks in the morning at MY1; both climb into the late afternoon (February tops out at 17:00, June at 16:00), so an `idxmax` over a morning window reports the window edge rather than a feature. PM2.5 is worse still — at this kerbside site it is dominated by non-exhaust wear and regional secondary aerosol, and the February/June profiles differed by under 1 µg/m³ across the whole morning. The original statistic was reporting noise and could not have separated a one-hour bug from a one-hour seasonal effect. PM2.5 remains the forecasting target throughout.
+
+Result, for the record: steepest rise at 06→07 local in both months, magnitudes within 0.1 µg/m³; in UTC hours the two months sit one hour apart, as BST = UTC+1 requires. Verdict unchanged from the raw-step test — AURN timestamps are UTC.
