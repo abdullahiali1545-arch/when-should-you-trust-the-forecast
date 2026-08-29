@@ -630,3 +630,11 @@ Unlike every entry above, this one was written **after** the data had been inspe
 (b) **The check uses NO₂ and the steepest hour-on-hour morning rise**, not PM2.5 and the morning peak. Neither pollutant peaks in the morning at MY1; both climb into the late afternoon (February tops out at 17:00, June at 16:00), so an `idxmax` over a morning window reports the window edge rather than a feature. PM2.5 is worse still — at this kerbside site it is dominated by non-exhaust wear and regional secondary aerosol, and the February/June profiles differed by under 1 µg/m³ across the whole morning. The original statistic was reporting noise and could not have separated a one-hour bug from a one-hour seasonal effect. PM2.5 remains the forecasting target throughout.
 
 Result, for the record: steepest rise at 06→07 local in both months, magnitudes within 0.1 µg/m³; in UTC hours the two months sit one hour apart, as BST = UTC+1 requires. Verdict unchanged from the raw-step test — AURN timestamps are UTC.
+
+### 2026-08-29 — Final holdout year fixed (pre-registration; no results seen)
+
+Holdout = 2025, the most recent complete year at ingestion. Sealed from this
+date. Ingestion computes per-column non-null coverage across the full
+2018–2025 span, 2025 included; this is a data-quality statistic, not a result,
+and no feature–target relationship in 2025 has been inspected. Any laterssss
+contact with 2025 is recorded here with its date.
