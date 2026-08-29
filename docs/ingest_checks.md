@@ -270,3 +270,50 @@ instrument outage rather than a chronically unreliable site. Carry to W1.6.
 
 `src/freshness_check.py`. Re-running gives a different lag — the value above is a
 snapshot at the pinned date and stands unless a re-pull is recorded here.
+
+## §3 — Ingest build, MY1 2018–2025
+
+Built 2026-08-29 by `src/ingest.py`. Snapshot pinned at build time.
+
+    rows   70,128  (= 2,922 days x 24; complete hourly grid, verified exact)
+    cols   15
+    span   2018-01-01 00:00 UTC .. 2025-12-31 23:00 UTC
+
+### Coverage
+
+| Column | Non-null |
+|---|---|
+| pm2_5 | 89.7% |
+| no2 | 96.6% |
+| boundary_layer_height | 93.8% |
+
+Imputed hours: 491 (0.7%), all single-hour gaps under the Part 6 rule.
+
+### Schema reconciliation
+
+Explicit allowlist, not `pd.concat` union. AURN column counts drift by year
+(2019 = 51, 2020 = 49, 2024 = 43). The union strategy makes "instrument never
+existed here" indistinguishable from "instrument failed"; the allowlist raises
+a KeyError naming the year and column instead. Verified: every allowlisted
+column is present in 2019, 2020 and 2024.
+
+### Open-Meteo boundary_layer_height gap — OPEN DECISION
+
+BLH is entirely null from 2024-01-01 to 2024-06-30 at MY1's coordinates,
+and complete in every other month 2018–2026. Checked month by month
+2026-08-29. The variable is recognised (units return as `m`); the values are
+absent. The 93.8% figure above is exactly 1 − 4,368/70,128, so this gap
+accounts for all missing BLH.
+
+Consequence for the watcher: a feature that is 100% null for six months is
+precisely what the distribution-distance family is built to detect. Left
+unhandled, the watcher would flag an Open-Meteo outage as covariate shift.
+
+DECISION DEFERRED TO W1.6: whether 2024-H1 is excluded from
+distribution-distance features, or BLH dropped entirely. No results seen.
+
+### MY1 site-level coverage
+
+PM2.5 at 89.7% across 2018–2025 clears the Part 5 threshold of 80%. The 78.7%
+figure recorded in §1.1 is one contiguous 2020 outage, not a chronically
+unreliable site. Formal station decision remains W1.6.
