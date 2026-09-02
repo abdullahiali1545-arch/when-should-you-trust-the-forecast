@@ -636,5 +636,53 @@ Result, for the record: steepest rise at 06→07 local in both months, magnitude
 Holdout = 2025, the most recent complete year at ingestion. Sealed from this
 date. Ingestion computes per-column non-null coverage across the full
 2018–2025 span, 2025 included; this is a data-quality statistic, not a result,
-and no feature–target relationship in 2025 has been inspected. Any laterssss
+and no feature–target relationship in 2025 has been inspected. Any laters
 contact with 2025 is recorded here with its date.
+
+### 2026-09-02 — Coverage threshold specified (W1.6 pre-registration; coverage figures seen, no model results seen)
+
+Part 5 step 4 said "keeps sites with ≥80% coverage" without specifying the
+period, the denominator, or whether the bar applies to both pollutants. Three
+readings were possible and they select different stations. Specified now, before
+`src/select_stations.py` is run.
+
+**Period.** Pooled over the station's record, with a per-year floor. Pooled
+alone would admit a station with a multi-year hole that would land inside a
+training window; a per-year minimum alone would reject a station for one
+instrument outage in an otherwise sound record. Walk-forward trains on
+multi-year windows, so usability is a property of the whole record — subject to
+no single year being catastrophic.
+
+**Denominator.** Hours between the station's first and last observation, not the
+full 2018–2025 span. Scoring absent years as 0% coverage would reject every
+station commissioned after 2018 on grounds unrelated to data quality.
+
+**Both pollutants, different bars.** PM2.5 is the target: a missing hour costs
+the row entirely — no truth, no label, no evaluation. NO₂ is one feature among
+many: a missing hour degrades some lags and leaves the row usable. Equal bars
+would misstate the asymmetry.
+
+| Screen | PM2.5 (target) | NO₂ (feature) |
+|---|---|---|
+| Pooled over operational record | ≥ 80% | ≥ 70% |
+| Per-year floor | ≥ 70% | none |
+
+**Results-seen status.** Coverage figures for MY1 had been seen at the time of
+writing: 78.7% PM2.5 for 2020 (`ingest_checks.md` §1.1) and 97.1% over the
+trailing 30 days (§2). No station-selection run, and no model results of any
+kind, had been produced. This entry is therefore pre-registered with respect to
+the selection outcome and post-hoc with respect to MY1's 2020 figure, and is
+recorded as such rather than claimed as clean.
+
+The relevant defence is that §2 establishes the 2020 shortfall as one contiguous
+instrument outage rather than chronic unreliability, that MY1 was named as the
+kerbside anchor on 17 August before any coverage was measured, and that the 70%
+floor is a bar MY1 clears with margin and a genuinely unreliable site would not.
+
+**Boundary-layer height.** `boundary_layer_height` is null across 2024-H1 at
+MY1's coordinates. This is an Open-Meteo gap, not an AURN station property, and
+is not a selection criterion — a weather-feature gap does not make a station
+unusable. `select_stations.py` records per-station BLH null rates alongside the
+pollutant coverage because the data is being pulled anyway; the decision on how
+to handle the gap is deferred to W1.7 and must be settled before the watcher's
+distribution-distance features are built.
