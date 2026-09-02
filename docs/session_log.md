@@ -15,7 +15,8 @@ the fold test. Struggled with: which slice "training window" means per fold.
 Unresolved: portfolio vs graded dissertation. Related-work section still needed
 before Week 3.
 Next: W1.2 — the April 2020 one-pager. One page, no notes open, no code.
-
+Done w1.2 in domain notes explained why no2 fell and pm2.5 rose during covid era and the watcher system. forgot
+to include it so i will i do it later . key
 
 
 
@@ -51,3 +52,32 @@ are RESULTS-SEEN, unlike the earlier entries. Listed at the end of
 docs/ingest_checks.md.
 
 **Next:** Fold in those two amendments, then W1.4 — freshness measurement.
+
+## 2026-08-26 — W1.3 closed, W1.4 complete
+
+Folded two results-seen amendments into PROJECT_SPEC.md: Part 6's diurnal check
+now specifies Europe/London hour grouping and NO2 steepest morning rise, with a
+dated changelog entry tagged results seen. Fixed "Both" -> "All three" lines of
+evidence in ingest_checks.md. Commit 99bf990.
+
+docs/information_contract.md IS on disk and committed (8,968 bytes, commit
+8df7e3e). Earlier belief that it was never saved was wrong. Content not yet
+audited against the spec's "names every deferred feature" requirement.
+
+W1.4 done. AURN publication lag at MY1 = 15.0 h, pinned 2026-08-26 14:00 UTC.
+PM2.5 and NO2 identically stale, so pipeline not instrument. Confirmed daily
+batch: re-run 37 min later, timestamp unchanged, lag grew by elapsed time only.
+Worst case <= 39 h. Lag exceeds the 6 h horizon, so AURN cannot support a live
+forward forecast (Part 12) — retrospective scoreboard still fine, LAQN needed
+for the forward half. Recorded in ingest_checks.md §2. Commit 06a8593.
+
+Also found: 2026 file is truncated not padded (5,688 rows = 237 x 24 exactly);
+MY1 PM2.5 currently 97.1% over 30 days, so 2020's 78.7% was one outage not a bad
+site — carry to W1.6; schema drift continues, 2026 = 43 cols.
+
+Understood: results-seen tagging; last row != last reading; lag as a deployment
+gap rather than leakage; batch vs rolling feed.
+Unresolved: the "it" in the W1.2 entry below, still unidentified. Half-finished
+W1.2 note still sitting uncommitted in this file.
+Next: audit docs/information_contract.md against spec Part 10, then src/ingest.py
+(Week 1 Day 2).
