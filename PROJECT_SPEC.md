@@ -686,3 +686,44 @@ unusable. `select_stations.py` records per-station BLH null rates alongside the
 pollutant coverage because the data is being pulled anyway; the decision on how
 to handle the gap is deferred to W1.7 and must be settled before the watcher's
 distribution-distance features are built.
+
+### 2026-09-02 — Coverage denominator specified; record-start condition added (W1.6; no selection results seen)
+
+Three points the 2026-09-02 threshold entry left open, settled before
+`src/select_stations.py` was run.
+
+**Denominator is per-pollutant.** Coverage for a pollutant is denominated on
+that instrument's operational record at that site — first to last non-null
+reading — not on the site's overall record and not on the full 2018–2025 span.
+A site that added a PM2.5 monitor in 2021 is scored on 2021 onward. Scoring it
+against 2018–2020 would measure commissioning history rather than data quality.
+
+The window is taken from the data, not from metadata `start_date`/`end_date`.
+Those describe the site and can be optimistic about when a given instrument was
+actually returning readings.
+
+**Partial years face the per-year floor**, denominated on the hours of that year
+falling inside the operational window. A station present for seven months of a
+year is judged on those seven months. No exclusion for short years: an exclusion
+rule is a place for post-hoc judgement to hide.
+
+**New condition — record must start on or before 2019-01-01.** This is an
+addition to the 2026-09-02 screen, not a clarification of it.
+
+Spec Part 10 trains fold 1 on 2018–2019. A station whose PM2.5 record begins in
+2021 contributes nothing to that fold, yet under the per-pollutant denominator
+above it could score above 80% pooled and pass. The failure would surface in
+Week 2 as a fold with missing stations rather than at selection, where it
+belongs.
+
+No selection run has been performed and no model results of any kind exist. The
+condition is pre-registered with respect to every station including MY1, whose
+record start has not been checked.
+
+Screen now reads:
+
+| Screen | PM2.5 (target) | NO₂ (feature) |
+|---|---|---|
+| Pooled over operational record | ≥ 80% | ≥ 70% |
+| Per-year floor | ≥ 70% | none |
+| Record begins | ≤ 2019-01-01 | none |
