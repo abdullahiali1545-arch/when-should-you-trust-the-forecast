@@ -159,7 +159,8 @@ gives the test:
 | F1 climatology | **Yes** | The (hour, month) means are averaged over the training window |
 | `abs(ŷ_F3 − ŷ_F2)` | **Yes** | Both models are refitted each fold |
 | `wasserstein_wind_vs_training` | **Yes** | The reference distribution *is* the training window |
-| Scaler / imputation parameters | **Yes** | Fitted on the training window |
+| Scaler / fitted imputation parameters | **Yes** | Fitted on the training window |
+| Ingest-time linear interpolation (gaps < 2 h) | No | Deterministic arithmetic on two observed neighbours; no fitted parameter. Applied once in `src/ingest.py`, already in the Parquet |
 | Label decile edges, 80th pct cut | **Yes** | Fitted parameters, frozen and applied to the test fold |
 
 **The pattern:** being *computed* does not make a feature fold-dependent.
@@ -186,7 +187,18 @@ feat  = wasserstein(wind.loc[t-71h:t], ref_k)
 ```
 
 ### Consequence for W1.7
+### The second lag: one fold of burn-in
 
+§3's six-hour blind spot operates *within* a fold. A second, larger lag operates
+*across* folds.
+
+The watcher may train only on **out-of-fold** F3 residuals. In-sample residuals
+are systematically too small and differently shaped, so a watcher trained on them
+learns a distribution that never occurs at test time. F3's fold-1 residuals are
+in-sample, so they are unusable.
+
+Consequence: the watcher's first scoreable fold is fold 2 — one quarter of
+burn-in behind F3. Spec Part 10. Budget for it when counting evaluation folds.
 **Three of the watcher's four feature families are fold-dependent** — residuals,
 disagreement, distribution distance. Only volatility is not. `src/features.py`
 therefore builds much less of the watcher than Part 9's feature list suggests, and the
