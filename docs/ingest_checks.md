@@ -337,3 +337,33 @@ Identical 93.8% BLH coverage at all four stations (MY1, KC1, BEX, HRL),
 i.e. the same 2024-01..2024-06 block everywhere. This is an Open-Meteo
 ERA5 archive gap, not a station or coordinate problem. A re-pull at
 different coordinates will not fix it.
+
+### Diurnal alignment check (W1.8, 2026-09-04)
+
+Second, independent line of evidence on timezone handling, per Spec Part 6.
+NO2 used rather than PM2.5: NO2 is exhaust-driven and has a sharp morning
+peak, whereas MY1's kerbside PM2.5 is non-exhaust dominated and nearly flat.
+
+NO2 morning peak hour, development period (2018-2024):
+
+| Station | Summer UTC | Summer local | Winter UTC | Winter local |
+|---|---|---|---|---|
+| BEX | 05:00 | 06:00 | 08:00 | 08:00 |
+| HRL | 06:00 | 07:00 | 08:00 | 08:00 |
+| KC1 | 06:00 | 07:00 | 08:00 | 08:00 |
+| MY1 | 12:00* | 12:00* | 09:00 | 09:00 |
+
+*MY1 summer hit the top edge of the 04:00-12:00 search window; no interior
+peak was found. Kerbside Marylebone Road has continuous congestion rather
+than a commuter spike. Not a usable number.
+
+VERDICT: consistent with UTC storage. Winter is uninformative (GMT == UTC).
+In summer, conversion to Europe/London REDUCES the summer-to-winter gap
+(3h->2h, 2h->1h, 2h->1h). Had the data been local wall-clock and converted
+anyway, the gap would have widened. Wrong sign for the bug hypothesis.
+
+Residual 1-2h gap survives conversion and is attributed to boundary-layer
+physics: the summer inversion breaks up earlier, dispersing trapped NO2
+before the clock-time rush peak. This check therefore CORROBORATES the W1.3
+epoch-step test rather than independently proving UTC storage. Two
+consistent lines of evidence; neither conclusive alone.

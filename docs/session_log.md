@@ -174,3 +174,21 @@ Next: audit docs/information_contract.md against spec Part 10, then src/ingest.p
 
 **Next**
 - W1.8 EDA notebook, then W1.9 sql/schema.sql.
+## 2026-09-04 (close) — W1 gate met
+
+All four stations (MY1, KC1, BEX, HRL) are ingested and featurised at 49
+columns each with passing canaries. Week 1's done condition — one command
+loads clean, UTC-correct, feature-engineered data for every surviving
+station — is met. Commits e3b9c77, 4f0b73f, db4c4c7.
+
+Remaining in W1: W1.8 EDA notebook, W1.9 sql/schema.sql. Neither blocks W2.
+
+Carried into W2:
+- BLH null for 2024-01..2024-06 at all four stations (Open-Meteo ERA5
+  archive gap). Handling is a pre-registration item, must be logged
+  before F3 is fitted.
+- MY1 is anchor, only traffic site, and weakest on coverage (76.1% clean
+  rows). Flag with the CA1 note in W4.
+- Line-by-line review of src/features.py still owed.
+
+Next session: W1.8 EDA notebook.
