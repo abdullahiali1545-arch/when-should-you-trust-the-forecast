@@ -81,3 +81,43 @@ Unresolved: the "it" in the W1.2 entry below, still unidentified. Half-finished
 W1.2 note still sitting uncommitted in this file.
 Next: audit docs/information_contract.md against spec Part 10, then src/ingest.py
 (Week 1 Day 2).
+
+## 2026-09-02 — W1.6 station selection (+ contract audit gate)
+
+**Done**
+- Contract audit closed: `docs/information_contract.md` reconciled against Spec Part 10.
+  Split ingest-time interpolation (fold-independent) from fitted imputation
+  (fold-dependent); added the out-of-fold burn-in note — watcher's first scoreable
+  fold is one behind F3's. Commit `3b84db5`.
+- Coverage threshold pre-registered (`2be7350`, marked "coverage figures seen"),
+  then denominator specified per-pollutant with a record-start condition
+  (`be6da4c`, "no selection results seen").
+- `src/select_stations.py` written and run. 18 London AURN candidates → 4 kept:
+  MY1 (urban traffic), KC1 (urban background), BEX (suburban background),
+  HRL (urban industrial). Every rejection carries a number in
+  `docs/station_selection.md`. Commit `461cb20`, pushed.
+- Start-date boundary corrected mid-run to match the pre-registered rule.
+  Outcome-neutral: HP1 fails on NO2 regardless. Recorded as such.
+
+**Understood**
+- Why the coverage denominator must be a full `date_range`, not `len(mask)`:
+  a missing row is missing data, and `len(mask)` silently counts it as absent
+  rather than as a gap.
+- Why the threshold entry had to say "coverage figures seen" — the decision
+  came after the numbers, and a reconstructed timestamp is worthless.
+
+**Consequence to carry forward**
+- CA1 rejected (63.8% PM2.5 coverage, 2021). MY1 is therefore the *only* traffic
+  site in the final set. H4's leave-one-station-out fold now tests transfer to an
+  unseen *site type*, which is harder than the spec assumed. FLAG IN WEEK 4 WRITE-UP.
+
+**Unresolved**
+- Do any London AURN sites report only PM2.5 sub-fractions (V2.5/NV2.5/GR2.5)
+  and no combined PM2.5? Such a site vanishes from candidates with no rejection row.
+- HP1, LONM, TED2 show NO2 pooled at exactly 0.0%. Genuinely no NO2 column, or a bug?
+- Portfolio vs. graded-dissertation framing; related-work section placement.
+- `boundary_layer_height` null for H1 2024 at MY1 — deferred to W1.6, status unknown.
+
+**Next**
+- W1.7 `src/features.py`. Fold-independent features only; check every candidate
+  against `docs/information_contract.md` §5 before writing it.
