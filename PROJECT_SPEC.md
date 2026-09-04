@@ -727,3 +727,20 @@ Screen now reads:
 | Pooled over operational record | ≥ 80% | ≥ 70% |
 | Per-year floor | ≥ 70% | none |
 | Record begins | ≤ 2019-01-01 | none |
+
+### 2026-09-04 — AURN allowlist split into required/optional (plumbing; no results seen)
+
+`load_aurn_year` raised on any absent allowlist column, forcing a
+year-vs-column choice per incident. BEX lacks PM10 and O3 in 2018 and O3 in
+2025; neither is a feature nor the target.
+
+Rule now: `date`, `pm2_5`, `no2` are required — absent means the year cannot
+supply the target or the NO₂ diagnostic, and ingest fails loudly. All other
+allowlist columns are optional context for the EDA notebook; absent means NaN
+for that year, logged at ingest.
+
+DECISION 1's purpose is unchanged: no column is ever silently NaN-filled by
+`pd.concat` taking a union. Only the response to an absent *non-modelled*
+column changes, from halt to log-and-continue.
+
+Written before any model was fitted. No forecasting or watcher results seen.

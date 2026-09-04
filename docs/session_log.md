@@ -146,3 +146,31 @@ Next: audit docs/information_contract.md against spec Part 10, then src/ingest.p
 
 **Next**
 - Ingest KC1, BEX, HRL. Then W1.8 EDA notebook.
+
+## 2026-09-04 (cont.) — W1: all four stations ingested and featurised
+
+**Done**
+- KC1, BEX, HRL ingested. All four stations now in data/processed and
+  data/features. 49 feature columns each, all canaries pass.
+- Coverage (PM2.5 / NO2): KC1 99.6/99.2, HRL 98.9/98.4, BEX 96.0/94.4,
+  MY1 89.7/96.6. Fully non-null feature rows: KC1 91.0%, HRL 90.0%,
+  BEX 82.2%, MY1 76.1%.
+- `ingest.py` allowlist split into required (date, pm2_5, no2) vs optional.
+  Triggered by BEX lacking PM10/O3 in 2018 and O3 in 2025. Required absent
+  still fails loudly; optional absent is NaN plus a log line.
+- BLH null is 93.8% coverage at ALL FOUR stations, identical. The
+  2024-01..2024-06 hole is an Open-Meteo ERA5 archive gap, not
+  station-specific. A re-pull elsewhere will not fix it.
+
+**Note for W4 write-up**
+- MY1 is both the anchor and the weakest site (76.1% clean rows vs KC1's
+  91.0%), and post-CA1 it is the only traffic site. Flag alongside the H4
+  transfer-difficulty note.
+
+**Unresolved**
+- BLH handling: keep with documented hole, or substitute. W2 pre-registration
+  item, must be logged before F3 is fitted.
+- Line-by-line review of features.py still owed.
+
+**Next**
+- W1.8 EDA notebook, then W1.9 sql/schema.sql.
