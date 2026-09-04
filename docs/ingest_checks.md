@@ -332,3 +332,8 @@ Consequence deferred to W2: whether to keep BLH with a documented
 hole (LightGBM handles NaN natively), re-pull, or substitute a proxy.
 That decision is a pre-registration item and must be logged before
 F3 is fitted. Not decided here.
+
+Identical 93.8% BLH coverage at all four stations (MY1, KC1, BEX, HRL),
+i.e. the same 2024-01..2024-06 block everywhere. This is an Open-Meteo
+ERA5 archive gap, not a station or coordinate problem. A re-pull at
+different coordinates will not fix it.

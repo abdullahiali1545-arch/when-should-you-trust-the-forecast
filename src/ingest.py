@@ -57,6 +57,24 @@ AURN_KEEP = {
     "temp": "temp_aurn",
 }
 
+# --------------------------------------------------------------------------
+# DECISION 1b — required vs optional allowlist columns (added W1.7, 2026-09-04,
+# no results seen).
+#
+# The guard above halted on ANY absent allowlist column, which forces a
+# year-vs-column choice even for columns the project never models. BEX 2018
+# lacks PM10 and O3; neither is a feature nor the target.
+#
+#   required absent -> the year is unusable for modelling. Fail loudly.
+#   optional absent -> NaN for that year, logged at ingest.
+#
+# The guard's purpose is unchanged: no column is ever silently NaN-filled by
+# pd.concat taking a union. Only the response to an absent NON-MODELLED column
+# changes, from halt to log-and-continue. A logged gap is documentation; a
+# silent one is the bug this guard exists to catch.
+# --------------------------------------------------------------------------
+AURN_REQUIRED = {"date", "pm2_5", "no2"}
+
 WEATHER_VARS = [
     "temperature_2m",
     "relative_humidity_2m",
@@ -120,14 +138,26 @@ def load_aurn_year(site: str, year: int) -> pd.DataFrame:
                              RAW / f"{site}_{year}.RData"))
 
     missing = [c for c in AURN_KEEP if c not in df.columns]
-    if missing:
+    required_missing = [c for c in missing if AURN_KEEP[c] in AURN_REQUIRED]
+    if required_missing:
         raise KeyError(
-            f"{site}_{year}: allowlist columns absent: {missing}. "
-            f"Decide explicitly whether to drop the column or the year — "
-            f"do not let pandas fill it with NaN."
+            f"{site}_{year}: required columns absent: {required_missing}. "
+            f"This year cannot supply the target or the NO2 diagnostic and "
+            f"is unusable for modelling. Decide explicitly whether to drop "
+            f"the year or the site — do not let pandas fill it with NaN."
         )
 
-    df = df[list(AURN_KEEP)].rename(columns=AURN_KEEP)
+    present = [c for c in AURN_KEEP if c in df.columns]
+    df = df[present].rename(columns=AURN_KEEP)
+
+    # Optional columns absent this year: NaN deliberately, and say so out loud.
+    for c in missing:
+        log.info("%s_%d: optional column %r absent - NaN for this year",
+                 site, year, AURN_KEEP[c])
+        df[AURN_KEEP[c]] = float("nan")
+
+    df = df[[AURN_KEEP[c] for c in AURN_KEEP]]      # stable column order
+
     # 'date' arrives as float64 Unix epoch seconds, and is genuine UTC
     # (verified W1.3, docs/ingest_checks.md §1). Localise, do not convert.
     df["date"] = pd.to_datetime(df["date"], unit="s", utc=True)
