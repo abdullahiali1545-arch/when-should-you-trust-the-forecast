@@ -121,3 +121,28 @@ Next: audit docs/information_contract.md against spec Part 10, then src/ingest.p
 **Next**
 - W1.7 `src/features.py`. Fold-independent features only; check every candidate
   against `docs/information_contract.md` §5 before writing it.
+
+## 2026-09-04 — W1.7 features.py
+
+**Done**
+- `src/features.py` written and run. 49 columns from MY1's processed Parquet.
+  Fold-independent only: lags (0/1/3/6/12/24h), rolling mean+sigma (3/6/12/24h),
+  deltas (1/3/6h), ERA5 weather at t, wind u/v, calendar at t and t+6h.
+- Canary self-test passes: poisoning pm2_5 at t*=2022-01-01 leaves all 35,064
+  earlier feature rows bit-identical. No feature reaches backwards in time.
+- Decisions taken: gapless hourly reindex before rolling (row-based windows);
+  min_periods = 75% of window; AURN's own ws/wd excluded in favour of ERA5;
+  calendar features derived in Europe/London, not UTC.
+- Output: 70,128 rows, 62,879 with a target, 53,342 fully non-null.
+
+**Found**
+- `boundary_layer_height` 100% null for 2024-01 to 2024-06. Recorded in
+  `docs/ingest_checks.md`. Handling deferred to W2 as a pre-registration item.
+
+**Unresolved**
+- KC1, BEX, HRL selected in W1.6 but not yet in `data/processed`. W1's done
+  condition requires all four.
+- Line-by-line review of `features.py` still owed.
+
+**Next**
+- Ingest KC1, BEX, HRL. Then W1.8 EDA notebook.

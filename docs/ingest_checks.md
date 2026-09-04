@@ -317,3 +317,18 @@ distribution-distance features, or BLH dropped entirely. No results seen.
 PM2.5 at 89.7% across 2018–2025 clears the Part 5 threshold of 80%. The 78.7%
 figure recorded in §1.1 is one contiguous 2020 outage, not a chronically
 unreliable site. Formal station decision remains W1.6.
+
+## boundary_layer_height gap (found W1.7, 2026-09-04)
+
+Open-Meteo ERA5 `boundary_layer_height` at MY1 is 100% null for
+2024-01 through 2024-06 — a contiguous six-month block, 4,368 hours,
+6.2% of the 2018-2025 record. All other months complete.
+
+Not scattered dropouts; a clean block, so likely structural in the
+archive rather than flaky retrieval. Not yet re-checked against a
+fresh pull — archives get backfilled.
+
+Consequence deferred to W2: whether to keep BLH with a documented
+hole (LightGBM handles NaN natively), re-pull, or substitute a proxy.
+That decision is a pre-registration item and must be logged before
+F3 is fitted. Not decided here.
