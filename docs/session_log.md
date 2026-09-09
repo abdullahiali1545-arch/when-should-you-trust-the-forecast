@@ -218,3 +218,42 @@ Next session: W1.8 EDA notebook.
 
 **Next session: W2 — walk-forward harness in src/evaluate.py.**
 Canary test written FIRST, same session. Do not start at the end of a day.
+
+## 2026-09-09 — W2.1: Week 1 debts cleared
+
+Done. All three W1 debts closed; W2.1 complete.
+1. BLH decision. Re-tested the archive API live: still 100% null for 2024-H1
+   at MY1, no error field, temperature populated in the same response.
+   Upstream and permanent, not the rate-limit artefact suspected. Dropped
+   boundary_layer_height from the feature set entirely; pre-registered in
+   PROJECT_SPEC before the code change, in its own commit. Still ingested and
+   audited each build as evidence of the gap. Removed from features.py,
+   sql/schema.sql (features table only), ingest_checks.md, smoke_test.py.
+   49 -> 48 columns; complete-row rate +5.0pp (MY1) to +6.1pp (KC1).
+   Canary PASS at all four stations.
+2. features.py reviewed line by line. Found and fixed: relative data paths
+   resolved against the launch directory, so a PyCharm right-click Run found
+   nothing. Now anchored to repo root, matching ingest.py.
+3. information_contract.md audited. Repaired a section-5 splice (a heading
+   with no body); corrected mae_24h, which averaged signed residuals and so
+   computed bias while naming it MAE; declared the ingest interpolation
+   one-hour look-ahead; added section 7 listing all three accepted
+   look-aheads with magnitudes.
+
+Understood. Why a contiguous null block is worse than scattered nulls — it
+becomes a proxy for a date range, so a tree can split on missingness and use
+the calendar while appearing to use weather. Why missing .abs() is merely
+wrong but missing .shift(6) is dangerous: wrong features make the model worse
+and you notice; leaked ones make it better and you don't.
+
+Struggled. Nearly committed an unsaved file again — git add on an unsaved
+file is a silent no-op. Rule: save, then git status --short, then git add.
+
+Unresolved. PROJECT_SPEC Part 7 still lists "boundary layer height" in prose;
+grep on the underscored name missed it. select_stations.py may not record
+per-station BLH null rates as the 2026-09-02 changelog entry claims.
+01_exploration.ipynb still has prompt placeholders in its markdown cells.
+
+Next. W2.2 — design the walk-forward harness on paper before writing code.
+Decide: training window growing or sliding, fold length, refit cadence,
+where fold-dependent features get built.
