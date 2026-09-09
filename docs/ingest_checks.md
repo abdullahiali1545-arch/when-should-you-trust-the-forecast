@@ -297,8 +297,13 @@ existed here" indistinguishable from "instrument failed"; the allowlist raises
 a KeyError naming the year and column instead. Verified: every allowlisted
 column is present in 2019, 2020 and 2024.
 
-### Open-Meteo boundary_layer_height gap — OPEN DECISION
-
+### Open-Meteo boundary_layer_height gap — CLOSED 2026-09-09
+RESOLVED: dropped from the feature set. Re-verified live 2026-09-09 — still
+100% null Jan–Jun 2024, upstream and permanent, not a rate-limit artefact.
+The gap is exactly H1 2024 and nothing else across 2018–2025: 6.2% of the
+record, identical at all four stations despite different ERA5 grid cells.
+Still ingested and audited on every build as evidence. Complete-row rate rose
++5.0pp (MY1) to +6.1pp (KC1) on removal. See PROJECT_SPEC changelog 2026-09-09.
 BLH is entirely null from 2024-01-01 to 2024-06-30 at MY1's coordinates,
 and complete in every other month 2018–2026. Checked month by month
 2026-08-29. The variable is recognised (units return as `m`); the values are

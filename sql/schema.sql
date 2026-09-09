@@ -164,7 +164,7 @@ CREATE TABLE features (
     temperature_2m          DOUBLE PRECISION,
     relative_humidity_2m    DOUBLE PRECISION,
     pressure_msl            DOUBLE PRECISION,
-    boundary_layer_height   DOUBLE PRECISION,
+
 
     -- wind as components. Raw direction is deliberately absent: it is
     -- circular, so 359 and 1 degrees are adjacent in reality and 358 apart

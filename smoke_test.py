@@ -41,7 +41,8 @@ print(f"[2] AURN: {df.shape[0]} rows x {df.shape[1]} cols | "
       f"PM2.5 coverage {100 * df['PM2.5'].notna().mean():.1f}%")
 
 # --- 3. Open-Meteo ERA5 archive, matched to the site's coordinates ---------
-# boundary_layer_height is deliberately absent — it errors on this endpoint.
+# boundary_layer_height omitted here. It does NOT error - it returns nulls
+# silently for 2024-H1 (verified 2026-09-09). Dropped from features; see spec.
 # Investigate on Session 4; see docs/ingest_checks.md.
 resp = requests.get(
     "https://archive-api.open-meteo.com/v1/archive",

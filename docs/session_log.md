@@ -192,3 +192,29 @@ Carried into W2:
 - Line-by-line review of src/features.py still owed.
 
 Next session: W1.8 EDA notebook.
+
+## 2026-09-04 — W1.9 and Week 1 close
+
+**Done**
+- sql/schema.sql written, not deployed (deployment is W5 per spec Part 3
+  change 6). Three tables: stations, observations, features.
+- features table stored despite being derived data. Staleness guard:
+  feature_version is part of the primary key, so versions coexist rather
+  than one silently overwriting the other.
+- Deliberately absent: forecasts, residuals, watcher_scores, labels. All
+  four are fold-dependent; persisting any would freeze one fold's view
+  across every fold. Documented in the file.
+- TIMESTAMPTZ not TIMESTAMP, so the W1.2 UTC finding is preserved in the
+  schema rather than discarded.
+
+**Week 1 complete.** Commit 2213363.
+
+**Carried into W2**
+- BLH null 2024-01..2024-06, all four stations, Open-Meteo archive gap.
+  Handling is a pre-registration item, must be logged BEFORE F3 is fitted.
+- Line-by-line review of src/features.py still owed.
+- Notebook markdown cells still hold prompts, not my own commentary.
+- MY1 is anchor, only traffic site, weakest coverage. Flag with CA1 note in W4.
+
+**Next session: W2 — walk-forward harness in src/evaluate.py.**
+Canary test written FIRST, same session. Do not start at the end of a day.

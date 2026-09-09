@@ -39,8 +39,13 @@ import pandas as pd
 # Configuration. Every number here is a design decision; see the module notes.
 # ----------------------------------------------------------------------------
 
-PROCESSED_DIR = Path("data/processed")
-FEATURES_DIR = Path("data/features")
+# Anchor to the repo root, not the working directory - matches ingest.py.
+# Path("data/processed") resolves against wherever the script was LAUNCHED
+# from, so a PyCharm right-click Run finds nothing while a terminal run from
+# the repo root works. Same bug would hit the harness; fixed here once.
+ROOT = Path(__file__).resolve().parents[1]
+PROCESSED_DIR = ROOT / "data" / "processed"
+FEATURES_DIR = ROOT / "data" / "features"
 
 HORIZON_H = 6                      # forecast horizon: PM2.5 at t+6h
 LOCAL_TZ = "Europe/London"         # calendar features are a local-clock question
@@ -51,11 +56,20 @@ ROLL_WINDOWS_H = [3, 6, 12, 24]
 DELTA_WINDOWS_H = [1, 3, 6]
 
 # Weather observed at t. ERA5 reanalysis - see contract §6 for the caveat.
+#
+# boundary_layer_height DROPPED 2026-09-09 (see PROJECT_SPEC changelog).
+# 100% null Jan-Jun 2024 upstream, re-verified live against the archive API on
+# 2026-09-09; permanent, not a rate-limit artefact. Excluded because (a) F2
+# cannot accept NaN and would be scored on different rows to F3, breaking the
+# watcher's model-disagreement feature |y_F3 - y_F2|, and (b) a contiguous
+# six-month null run makes BLH-missingness a near-perfect proxy for a date
+# range, so a tree could split on it and appear to use weather while partly
+# using the calendar. Still fetched by ingest.py and present in the processed
+# Parquet as evidence of the gap - deliberately not promoted to a feature.
 WEATHER_COLS = [
     "temperature_2m",
     "relative_humidity_2m",
     "pressure_msl",
-    "boundary_layer_height",
 ]
 WIND_SPEED_COL = "wind_speed_10m"
 WIND_DIR_COL = "wind_direction_10m"
@@ -175,6 +189,10 @@ def weather_features(df: pd.DataFrame) -> dict[str, pd.Series]:
     Mode B forbids weather after t (contract §2). Nothing here is shifted
     forward. See §6 on the mild reanalysis look-ahead — accepted, not
     engineered around, but it must be stated in the README.
+
+    Note: this reads WEATHER_COLS, so dropping a column there drops it from
+    the feature set entirely. boundary_layer_height was removed 2026-09-09 and
+    needs no separate edit here.
     """
     return {c: df[c].astype("float64") for c in WEATHER_COLS if c in df}
 
@@ -309,16 +327,19 @@ def process_station(path: Path, run_canary: bool) -> None:
     if inserted:
         print(f"  grid: inserted {inserted:,} missing hourly rows as NaN")
 
-    # Audit boundary_layer_height. It was entirely null for H1 2024 at MY1's
-    # coordinates. A silently-null physical driver would make the watcher
-    # misfire; surface it here rather than in Week 2.
+    # Standing audit of boundary_layer_height. It is NOT in the feature set
+    # (dropped 2026-09-09, see WEATHER_COLS above) but is still ingested, so
+    # this reports the gap on every build and keeps the changelog claim
+    # verifiable from a fresh run. Do not delete: the printed number is the
+    # evidence for the decision.
     if "boundary_layer_height" in gridded:
         blh = gridded["boundary_layer_height"]
-        print(f"  boundary_layer_height null: {blh.isna().mean():.1%} overall")
+        print(f"  boundary_layer_height null: {blh.isna().mean():.1%} overall "
+              f"(NOT a feature - audit only)")
         by_year = blh.isna().groupby(gridded.index.year).mean()
         bad = by_year[by_year > 0.5]
         if len(bad):
-            print("  WARNING - >50% null in: "
+            print("  NOTE - >50% null in: "
                   + ", ".join(f"{y} ({v:.0%})" for y, v in bad.items()))
 
     feats = build_features(raw)
