@@ -744,3 +744,30 @@ DECISION 1's purpose is unchanged: no column is ever silently NaN-filled by
 column changes, from halt to log-and-continue.
 
 Written before any model was fitted. No forecasting or watcher results seen.
+
+### 2026-09-09 — BLH dropped from the feature set (decision; no model results seen)
+
+`boundary_layer_height` is 100% null January–June 2024 at all four stations in the
+Open-Meteo ERA5 archive. Verified live 2026-09-09: a request for 2024-03-01 to
+2024-03-02 at MY1's coordinates returns 48 nulls for `boundary_layer_height`
+while `temperature_2m` is fully populated in the same response, with no error
+field. The gap is upstream and permanent; re-pulling does not resolve it.
+
+BLH is removed from the feature set entirely, for all years and all stations.
+
+Reasons. (a) F2 cannot accept NaN and would drop six months, so F2 and F3 would
+be scored on different samples and the watcher's model-disagreement feature
+|ŷ_F3 − ŷ_F2| would be undefined across that block. (b) The nulls form one
+contiguous six-month run, so BLH-missingness is a near-perfect proxy for a
+specific date range; F3 could split on it and appear to use weather while partly
+using the calendar. (c) Climatological imputation would make the feature
+fold-dependent, moving it into the harness, and would supply six months of
+confident values carrying no information.
+
+Cost accepted: F3 loses a physically strong predictor of PM2.5 dilution.
+Temperature, pressure, wind speed and hour-of-day are partial proxies, not
+replacements. Forecast accuracy is scaffolding, not the research question, so a
+marginally weaker F3 does not affect H2 or H3.
+
+Written before any F0–F3 walk-forward results existed. Persistence MAE from
+Week 1 EDA had been seen; no model comparison had.
