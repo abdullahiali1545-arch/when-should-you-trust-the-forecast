@@ -6,10 +6,10 @@ All four share one interface so the harness can treat them identically:
     model.predict(test: pd.DataFrame) -> np.ndarray
 
 Frames are indexed by ORIGIN (UTC) and carry the feature columns plus:
-    LAG0_COL   current PM2.5 at the origin   (F0 reads this)
-    HOUR_COL   hour of day, Europe/London    (F1 groups on this)
-    MONTH_COL  calendar month                (F1 groups on this)
-    TARGET_COL PM2.5 at origin + h           (built by the harness, never features.py)
+    LAG0_COL    PM2.5 at the origin                  (F0 reads this)
+    HOUR_COL    hour of day at the TARGET time       (F1 groups on this)
+    MONTH_COL   calendar month at the TARGET time    (F1 groups on this)
+    TARGET_COL  PM2.5 at origin + h
 
 Fitting happens on T_k only, every fold. Nothing here is fitted once globally —
 F1's climatology means in particular must not see months from after the fold
@@ -27,13 +27,28 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-# --- column names -----------------------------------------------------------
-# CHECK THESE AGAINST src/features.py. If a name is wrong the harness raises
-# immediately rather than silently scoring a different model.
-LAG0_COL = "pm2_5"
-HOUR_COL = "hour"
-MONTH_COL = "month"
-TARGET_COL = "target"
+# --- column names, matched to data/features/<STATION>.parquet ---------------
+LAG0_COL = "pm2_5_lag_0"
+
+# F1 predicts PM2.5 at t+6, so it groups on the TARGET's hour and month, not
+# the origin's. Grouping on the origin's clock would mis-specify F1 by six
+# hours. target_hour / target_month are legitimate features: the calendar at
+# t+6 is deterministic and fully known at time t.
+HOUR_COL = "target_hour"
+MONTH_COL = "target_month"
+
+# The target lives in the feature table as y_t6 (built by src/features.py,
+# contrary to docs/harness_design.md §1 — recorded in the spec changelog).
+# It must therefore NEVER appear in any model's feature_cols. See EXCLUDE
+# below and the assert in build_feature_cols().
+TARGET_COL = "y_t6"
+
+# Columns that are not features, for any model, ever.
+#   y_t6     the target — including it means predicting the target from the
+#            target: MAE near zero, no error, no warning. The highest-severity
+#            leak available in this project.
+#   imputed  a data-quality flag, not a physical predictor.
+EXCLUDE: frozenset[str] = frozenset({TARGET_COL, "imputed"})
 
 # --- F3 hyperparameters, pre-registered and not tuned -----------------------
 # deterministic=True gives stable results across thread counts; it must be
@@ -54,6 +69,39 @@ F3_PARAMS = dict(
     n_jobs=4,
     verbosity=-1,
 )
+
+# F2's feature set: weather-conditioned plus the short autoregressive terms.
+# Deliberately explicit and small. F2 exists to answer "did the watcher merely
+# detect unusual weather?", so it has to be a weather-conditioned reference a
+# reviewer can read in one glance.
+F2_COLS: tuple[str, ...] = (
+    "pm2_5_lag_0",
+    "pm2_5_lag_1",
+    "pm2_5_lag_3",
+    "pm2_5_lag_6",
+    "pm2_5_lag_24",
+    "no2_lag_0",
+    "pm2_5_mean_24h",
+    "pm2_5_delta_6h",
+    "temperature_2m",
+    "relative_humidity_2m",
+    "pressure_msl",
+    "wind_u",
+    "wind_v",
+)
+
+
+def build_feature_cols(frame: pd.DataFrame, exclude: frozenset[str] = EXCLUDE) -> list[str]:
+    """Every column except the target and non-feature flags.
+
+    Never write `feature_cols = list(df.columns)` anywhere in this project.
+    The assert below is the last line of defence against the target leak.
+    """
+    cols = [c for c in frame.columns if c not in exclude]
+    assert TARGET_COL not in cols, (
+        f"{TARGET_COL} is in the feature list — this is the catastrophic leak"
+    )
+    return cols
 
 
 def _require(frame: pd.DataFrame, cols: Sequence[str], who: str) -> None:
@@ -76,7 +124,7 @@ class F0Persistence:
 
 
 class F1Climatology:
-    """Mean target by (hour of day x month), refitted on T_k every fold.
+    """Mean target by (target hour x target month), refitted on T_k every fold.
 
     Refitting matters: means computed once over all years would include months
     from after the fold boundary, which is a fold-dependency violation.
@@ -114,8 +162,9 @@ class F2Linear:
 
     name = "F2"
 
-    def __init__(self, feature_cols: Sequence[str], alpha: float = 1.0) -> None:
-        self.feature_cols = list(feature_cols)
+    def __init__(self, feature_cols: Sequence[str] = F2_COLS, alpha: float = 1.0) -> None:
+        self.feature_cols = [c for c in feature_cols if c not in EXCLUDE]
+        assert TARGET_COL not in self.feature_cols, "target in F2 feature list"
         self._pipe = make_pipeline(StandardScaler(), Ridge(alpha=alpha))
 
     def fit(self, train: pd.DataFrame) -> None:
@@ -137,7 +186,8 @@ class F3LightGBM:
     name = "F3"
 
     def __init__(self, feature_cols: Sequence[str], params: dict | None = None) -> None:
-        self.feature_cols = list(feature_cols)
+        self.feature_cols = [c for c in feature_cols if c not in EXCLUDE]
+        assert TARGET_COL not in self.feature_cols, "target in F3 feature list"
         self._model = LGBMRegressor(**(params or F3_PARAMS))
 
     def fit(self, train: pd.DataFrame) -> None:
