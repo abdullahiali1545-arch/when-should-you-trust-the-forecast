@@ -35,7 +35,7 @@ The forecaster is scaffolding. The watcher and the routing policy are the projec
 | **H3** | Routing distrusted forecasts to a fallback lowers total error at 100% coverage, vs always-ML and vs always-fallback | **The headline result** |
 | **H4** | A watcher trained on some stations transfers to unseen stations (leave-one-station-out) | Generalisation |
 | **H5** | Routing improves cost-weighted alert decisions under asymmetric costs | Optional extension |
-
+| **H6** | Distrust flags show positive spatial dependence across stations, beyond city-wide pollution levels | Extension — pre-registered 2026-09-14 |
 Every one of these can fail informatively. Part 13 pre-registers what each failure would mean.
 
 ---
@@ -396,7 +396,7 @@ This is shippable on its own and is already a strong project.
 ### EXTENSIONS — only if the core works
 
 Leave-one-station-out (H4) · ablation study · COVID validation section · Postgres + GitHub Actions refresh · decision layer (H5) · live scoreboard.
-
+Spatial coherence of distrust (H6) — depends on multi-station native watcher replication, not on H4
 ### CUT — do not build
 
 ULEZ stress test · multiple forecast horizons · neural networks · seven notebooks · PDF report · exploratory "identify periods of distribution shift" phase · AERONET/column data (see `docs/data_audit.md`) · night-time/stellar targets.
@@ -771,3 +771,42 @@ marginally weaker F3 does not affect H2 or H3.
 
 Written before any F0–F3 walk-forward results existed. Persistence MAE from
 Week 1 EDA had been seen; no model comparison had.
+
+### 2026-09-14 — H6 added: spatial coherence of distrust (pre-registered; no results seen)
+
+Drafted 2026-09-11, committed 2026-09-14; the delay is recorded rather than
+backdated. No F0–F3, watcher or routing result exists at any station as of
+this commit — Week 2 is at the harness-design stage.
+
+H6: Forecast unreliability (R3 distrust flags) shows positive spatial
+dependence across MY1, KC1, BEX and HRL, beyond what city-wide pollution
+levels alone (proxied by R1's high-predicted-concentration flag) would
+produce.
+
+Scored with each station's OWN natively-trained watcher (own walk-forward
+folds, own OOF residuals) — NOT the H4 leave-one-station-out watcher, which
+answers a different question (transfer) and would confound it with this one.
+
+Metrics, both computed against the same circular-block-shift null (whole-week
+rotations, >=1,000 resamples) for R1 and for R3, pooled across all six
+station-pairs:
+  - Excess co-firing (primary): observed pooled co-firing rate - mean
+    co-firing rate under the null.
+  - Lift (secondary): observed pooled co-firing rate / mean co-firing rate
+    under the null. Not lift against naive independence, P(A)xP(B) — the null
+    already encodes each station's real base rate and autocorrelation, so it
+    is the correct denominator.
+
+Win condition, stated in advance: the interval on (R3's excess co-firing -
+R1's excess co-firing) must exclude zero. Anything else is reported as
+"distrust's spatial structure is inherited from the pollution field, not
+additionally learned by the watcher" — a valid result.
+
+Known limitation, stated in advance: four stations of four different site
+types gives six station-pairs, not the ten a larger roster would give, and
+site-type differences are a live alternative explanation for any one pair's
+pattern. Claims stay at the pooled level. Station distance is reported as one
+descriptive sentence in the discussion, not tested as a hypothesis — six pairs
+is nowhere near enough to distinguish a distance trend from noise.
+
+H6 is an EXTENSION. It is attempted only after the Week 3 core has shipped.
