@@ -847,3 +847,51 @@ much better the numbers look when observed weather at prediction time is used.
 
 Decided after F0–F3 Mode B results were seen. Deferral is on time grounds
 against the end-of-September deadline, not on results.
+
+### 2026-09-18 — W3.1 stratified error labels pre-registered (no W3 results seen)
+
+Fixed by Part 8 and not revisited: `n_bins = 10`, `q = 0.80`.
+
+**Fitting set.** Thresholds for test fold k are fitted on out-of-fold F3
+residuals from folds strictly earlier than k. In-sample residuals are never
+used: they are systematically smaller and differently shaped, so thresholds
+fitted on them would understate what counts as a bad error.
+
+**Procedure.** Bin rows by *predicted* concentration into deciles; within each
+bin, label the top 20% of absolute errors as unreliable. Bins come from
+predicted values because actual values do not exist at prediction time.
+
+**Frozen application.** Decile edges and per-bin cut-offs are computed on the
+fitting set and applied unchanged to the test fold. The realised test-fold
+positive rate will drift from 20%. That drift is reported per fold, never
+corrected — it measures shift in the error process, which is the object of
+study.
+
+**Edge cases, decided in advance:**
+
+1. Predictions outside the fitted range are CLIPPED into the outermost bin, not
+   dropped. Dropping would alter the evaluation set and would remove exactly the
+   extreme cases the watcher most needs to be tested on.
+2. Duplicate decile edges are dropped (`duplicates='drop'`). The realised bin
+   count is recorded per fold. Forcing unique edges would invent structure the
+   data does not contain.
+3. A bin with fewer than 50 fitting rows uses the global (all-bin) cut-off
+   instead of its own, and the substitution is logged. An 80th percentile
+   estimated from a handful of points is noise.
+4. Rows with a missing residual are EXCLUDED from labelling, not labelled 0. A
+   missing residual means the hour is absent, not that the forecast was good.
+5. Relative-error robustness check: |y - yhat| / max(yhat, floor), with
+   floor = the 10th percentile of predicted concentration on the fitting set.
+   The floor is a fitted parameter and is frozen exactly as the other
+   thresholds are.
+
+**Interface.** Two functions, deliberately separated:
+
+    fit_label_thresholds(pred, actual, n_bins=10, q=0.80) -> (edges, cutoffs)
+    apply_labels(pred, actual, edges, cutoffs)            -> labels
+
+`apply_labels` may not compute any quantile, percentile or other statistic of
+its input. It consumes thresholds; it never estimates them. This separation is
+the leakage defence, not a stylistic choice.
+
+Written before any labelling code was run. No W3 results seen.
