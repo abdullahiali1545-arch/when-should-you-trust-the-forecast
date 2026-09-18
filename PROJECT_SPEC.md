@@ -925,3 +925,29 @@ watcher performance. Variables are fixed here and not swapped after seeing
 results.
 
 Written before any watcher feature code was run.
+
+### 2026-09-18 — W3.3 watcher classifier pre-registered (no watcher results seen)
+
+Model: LightGBM binary classifier. Chosen for native NaN handling (avoiding an
+imputation step that would add a fitted parameter) and scale invariance across
+feature families that differ by orders of magnitude.
+
+Hyperparameters, fixed here and NOT tuned against PR-AUC:
+  n_estimators 200, learning_rate 0.05, num_leaves 15, max_depth 4,
+  min_child_samples 50, subsample 0.8, colsample_bytree 0.8,
+  random_state 42, deterministic true, n_jobs 1.
+Deliberately smaller than F3: the watcher's training set is a fraction of F3's
+and carries roughly 20% positives.
+
+Training set for test fold k: folds 2..k-1. Fold 1 has no labels (W3.1
+burn-in), so the watcher's first scoreable fold is 3. Eighteen folds are
+scored, not twenty. This is reported, not engineered around.
+
+Primary metric: PR-AUC, with the fold's own positive rate as the no-skill
+baseline. Accuracy is not reported: at an 18.6% positive rate a
+constant "trust" prediction scores 81%.
+
+The classifier outputs a probability. Converting it to a routing decision is
+W3.4 and uses a threshold fitted on training folds only.
+
+Written before any watcher was trained.
