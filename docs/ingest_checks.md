@@ -372,3 +372,18 @@ physics: the summer inversion breaks up earlier, dispersing trapped NO2
 before the clock-time rush peak. This check therefore CORROBORATES the W1.3
 epoch-step test rather than independently proving UTC storage. Two
 consistent lines of evidence; neither conclusive alone.
+
+### 2026-09-18 — Pipeline canary, MY1 (W2 debt cleared)
+
+`tests/test_canary_pipeline.py`: raw processed parquet -> build_features ->
+run_walk_forward -> OOF. Three placements derived from real fold geometry.
+
+Determinism pre-check: two unpoisoned runs bit-identical (116s).
+
+  mid-train     2020-03-31 21:00Z   2,073 rows compared   PASS
+  pre-boundary  2022-06-30 21:00Z  16,658 rows compared   PASS
+  mid-test      2022-08-16 00:00Z  17,575 rows compared   PASS
+
+No origin earlier than t* changed when t* was poisoned. Coverage is
+processed -> OOF; ingest-time interpolation is outside it and remains the
+declared look-ahead of information_contract.md §7.
