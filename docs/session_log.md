@@ -257,3 +257,9 @@ per-station BLH null rates as the 2026-09-02 changelog entry claims.
 Next. W2.2 — design the walk-forward harness on paper before writing code.
 Decide: training window growing or sliding, fold length, refit cadence,
 where fold-dependent features get built.
+
+Fold 4 (Q4 2020) investigated: 1,822 of 2,208 hours dropped by scorable_mask.
+Cause is the MY1 PM2.5 instrument, not feature construction — every null column
+is pm2_5-derived; weather is complete. Raw pm2_5 null 78.4% across the quarter:
+Oct 58.9%, Nov 100%, Dec 77.2%. Consistent with the 78.7% coverage figure from
+the W1 station audit. Fold 4 is retained and reported with n_test alongside.

@@ -26,8 +26,8 @@ corrected. It measures shift in the error process, which is the object of study.
 All five edge cases below were pre-registered in PROJECT_SPEC.md before this
 file was written.
 
-Convention: label = 1 iff abs_err > cutoff. Strictly greater, in both fit and
-apply. Ties fall on the reliable side.
+Convention: label = 1 iff abs_err exceeds the cut-off. Strictly greater, in both
+fit and apply. Ties fall on the reliable side.
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ class LabelThresholds:
     edges: np.ndarray            # bin boundaries, len = n_bins_realised + 1
     cutoffs: np.ndarray          # per-bin absolute-error cut-off
     floor: float                 # relative-error denominator floor
-    n_bins_realised: int         # may be < N_BINS if edges collapsed
+    n_bins_realised: int         # may be fewer than N_BINS if edges collapsed
     fallback_bins: list[int] = field(default_factory=list)
     n_fit_rows: int = 0
     q: float = Q
@@ -115,13 +115,13 @@ def fit_label_thresholds(
     fallback_bins: list[int] = []
     for b in range(n_realised):
         in_bin = abs_err[binned == b]
-        if len(in_bin) < min_bin:
+        if in_bin.size >= min_bin:
+            cutoffs[b] = float(in_bin.quantile(q))
+        else:
             # Decision 3. A q-quantile of a handful of points is noise, and a
             # noisy cut-off produces noisy labels the watcher then tries to fit.
             cutoffs[b] = global_cutoff
             fallback_bins.append(b)
-        else:
-            cutoffs[b] = float(in_bin.quantile(q))
 
     # Decision 5. Floor for the relative-error robustness check, derived from
     # the fitting set rather than picked by hand, so it cannot be tuned after
@@ -143,8 +143,8 @@ def _assign_bins(pred: pd.Series, edges: np.ndarray) -> pd.Series:
     """Bin each prediction, clipping out-of-range values — decision 1.
 
     pd.cut returns NaN outside the edges; it does not clip. So the outer edges
-    are replaced with -inf/+inf, which states the intent in the data rather than
-    hiding it in a clip() call elsewhere.
+    are replaced with -inf and +inf, which states the intent in the data rather
+    than hiding it in a clip() call elsewhere.
 
     Clipping rather than dropping: dropping would alter the evaluation set and
     would remove exactly the extrapolated cases the watcher most needs testing
@@ -169,7 +169,7 @@ def apply_labels(
     .quantile(), .mean(), .std() or any other statistic of its own input — that
     separation is the leakage defence, not a stylistic preference.
 
-    Rows with a missing pred or actual return <NA>, not 0 (decision 4), so the
+    Rows with a missing pred or actual return pd.NA, not 0 (decision 4), so the
     return dtype is nullable Int8.
     """
     bins = _assign_bins(pred, thr.edges)
@@ -179,13 +179,90 @@ def apply_labels(
     # (only possible if pred is NaN) get a NaN cut-off and fall out below.
     cutoff_per_row = bins.map(lambda b: thr.cutoffs[int(b)] if pd.notna(b) else np.nan)
 
-    labels = (abs_err > cutoff_per_row).astype("Int8")
+    labels = abs_err.gt(cutoff_per_row).astype("Int8")
     labels[pred.isna() | actual.isna()] = pd.NA
     return labels
 
 
+def label_walk_forward(
+    oof: pd.DataFrame,
+    pred_col: str = "yhat_F3",
+    actual_col: str = "y_true",
+) -> tuple[pd.Series, pd.DataFrame]:
+    """Label every fold using thresholds fitted only on EARLIER folds.
+
+    This is the honest counterpart to the module self-check below. That check
+    fits on all rows at once, which is fine for verifying the binning maths and
+    useless for anything else: it lets a fold's own errors set the standard its
+    errors are judged against.
+
+    Here, fold k is labelled with thresholds estimated on folds 1..k-1 and then
+    frozen. The fitting set expands, mirroring the harness's expanding training
+    window, and keeping enough rows per bin for the per-bin quantile to mean
+    something.
+
+    Fold 1 receives no labels: there are no earlier folds to fit on. This is the
+    burn-in Part 10 warns about — the watcher's first scoreable fold is one
+    behind F3's. It is reported, not worked around.
+
+    Returns
+    -------
+    labels : Int8 Series aligned to oof.index; pd.NA for fold 1 and for any row
+             with a missing prediction or actual.
+    diag   : one row per fold. The realised positive rate is the pre-registered
+             drift measurement, so this frame is a deliverable, not debug output.
+    """
+    labels = pd.Series(pd.NA, index=oof.index, dtype="Int8")
+    diag_rows: list[dict] = []
+
+    for k in sorted(oof["fold"].unique()):
+        # Strictly earlier folds only. That strictness is the whole leakage
+        # defence here: allowing fold k into its own fitting set would let it
+        # set the standard it is judged against, and the symptom would be a
+        # positive rate of exactly 0.20 in every fold.
+        fit = oof[oof["fold"].lt(k)]
+        test = oof[oof["fold"].eq(k)]
+
+        if len(fit) == 0:
+            diag_rows.append({
+                "fold": k, "n_fit": 0, "n_test": len(test),
+                "n_labelled": 0, "positive_rate": np.nan,
+                "n_bins_realised": 0, "n_fallback_bins": 0,
+                "n_clipped_low": 0, "n_clipped_high": 0,
+            })
+            continue
+
+        thr = fit_label_thresholds(fit[pred_col], fit[actual_col])
+        fold_labels = apply_labels(test[pred_col], test[actual_col], thr)
+
+        # Align by index, never by position. test is a filtered view of oof, so
+        # its index carries the original row identities.
+        labels.loc[test.index] = fold_labels
+
+        # Counted against the RAW edges, because _assign_bins opens them to
+        # -inf and +inf before cutting, after which nothing is out of range by
+        # construction. Decision 1 clips rather than drops, so these rows are
+        # still labelled; this counts how many were judged against a cut-off
+        # fitted on predictions unlike their own.
+        pred_test = test[pred_col]
+        diag_rows.append({
+            "fold": k,
+            "n_fit": thr.n_fit_rows,
+            "n_test": len(test),
+            "n_labelled": int(fold_labels.notna().sum()),
+            "positive_rate": (float(fold_labels.mean())
+                              if fold_labels.notna().any() else np.nan),
+            "n_bins_realised": thr.n_bins_realised,
+            "n_fallback_bins": len(thr.fallback_bins),
+            "n_clipped_low": int(pred_test.lt(thr.edges[0]).sum()),
+            "n_clipped_high": int(pred_test.gt(thr.edges[-1]).sum()),
+        })
+
+    return labels, pd.DataFrame(diag_rows).set_index("fold")
+
+
 def relative_error(pred: pd.Series, actual: pd.Series, floor: float) -> pd.Series:
-    """|y - yhat| / max(yhat, floor) — the Part 8 robustness definition.
+    """The Part 8 robustness definition: absolute error over max(pred, floor).
 
     The floor stops small denominators exploding. It comes from thr.floor, i.e.
     from the fitting set, never from the rows being scored.
@@ -194,23 +271,33 @@ def relative_error(pred: pd.Series, actual: pd.Series, floor: float) -> pd.Serie
 
 
 if __name__ == "__main__":
-    # Self-check: applying thresholds back to the data they were fitted on must
-    # give a positive rate of about 1 - q. If it does not, the binning is wrong
-    # — most likely the clipping or an off-by-one in the edges.
     from pathlib import Path
 
     oof = pd.read_parquet(
         Path(__file__).resolve().parents[1] / "data/oof" / "MY1_oof.parquet"
     )
-    pred, actual = oof["yhat_F3"], oof["y_true"]
 
-    thr = fit_label_thresholds(pred, actual)
-    print(thr)
+    # --- mechanical self-check ----------------------------------------------
+    # Thresholds applied to the data they were fitted on must give a positive
+    # rate of 1 - q. This verifies the binning and clipping only. It is NOT how
+    # labels are produced for the watcher.
+    thr_all = fit_label_thresholds(oof["yhat_F3"], oof["y_true"])
+    rate_all = apply_labels(oof["yhat_F3"], oof["y_true"], thr_all).mean()
+    assert np.isclose(rate_all, 1 - Q, atol=0.02), "binning is wrong — check edges"
+    print(f"in-sample self-check: {rate_all:.4f} (expect {1 - Q:.2f}) — passed\n")
 
-    labels = apply_labels(pred, actual, thr)
-    rate = labels.mean()
-    print(f"\nin-sample positive rate: {rate:.4f}   (expect ~{1 - Q:.2f})")
-    print(f"labelled rows: {labels.notna().sum():,} of {len(labels):,}")
+    # --- the real thing ------------------------------------------------------
+    labels, diag = label_walk_forward(oof)
+    print(diag.to_string())
 
-    assert abs(rate - (1 - Q)) < 0.02, "binning is wrong — check clipping/edges"
-    print("self-check passed")
+    scored = diag["positive_rate"].dropna()
+    print(f"\nlabelled: {labels.notna().sum():,} of {len(labels):,} rows")
+    print(f"overall positive rate: {labels.mean():.4f}")
+    print(f"per-fold rate: min {scored.min():.3f}  max {scored.max():.3f}  "
+          f"spread {scored.max() - scored.min():.3f}")
+
+    if np.isclose(scored.std(), 0.0):
+        raise SystemExit(
+            "every fold has an identical positive rate — thresholds are being "
+            "refitted on the fold being labelled"
+        )
