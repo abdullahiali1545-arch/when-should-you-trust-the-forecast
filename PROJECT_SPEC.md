@@ -895,3 +895,33 @@ its input. It consumes thresholds; it never estimates them. This separation is
 the leakage defence, not a stylistic choice.
 
 Written before any labelling code was run. No W3 results seen.
+### 2026-09-18 — W3.2 watcher features pre-registered (no watcher results seen)
+
+Four families, per Part 9. Three are fold-dependent and are therefore built
+inside the walk-forward harness, not src/features.py (Part 10, the fold test).
+
+**1. Distribution distance.** Wasserstein distance between a recent window and
+the fold's training window, computed on six variables: pm2_5_lag_0, wind_u,
+wind_v, temperature_2m, relative_humidity_2m, yhat_F3. Each is standardised
+using training-window mean and standard deviation before the distance is taken,
+so that variables on larger scales do not dominate. Recent windows: 24h and
+168h (one week). Chosen over PSI because PSI requires an arbitrary binning
+choice. boundary_layer_height is excluded: dropped 2026-09-09 as unavailable.
+
+**2. Volatility.** Rolling standard deviation and rolling mean absolute change
+of PM2.5 over 3, 6, 12 and 24 hours. Fold-independent; reuses the existing
+columns in src/features.py rather than recomputing them.
+
+**3. Model disagreement.** abs(yhat_F3 - yhat_F2) at the origin, plus its
+rolling mean over 24h. Requires no ground truth and no waiting.
+
+**4. Recent residuals.** Rolling MAE, rolling signed bias and rolling residual
+standard deviation of F3, over 24h and 168h, computed ONLY from origins at or
+before t - 6h. A forecast made at origin s has no residual until s+6h, so any
+window reaching later than t-6h would read outcomes that have not occurred.
+
+Window lengths (3/6/12/24/168h) are fixed here and are not tuned against
+watcher performance. Variables are fixed here and not swapped after seeing
+results.
+
+Written before any watcher feature code was run.
