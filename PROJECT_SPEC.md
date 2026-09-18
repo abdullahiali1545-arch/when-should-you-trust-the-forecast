@@ -810,3 +810,40 @@ descriptive sentence in the discussion, not tested as a hypothesis — six pairs
 is nowhere near enough to distinguish a distance trend from noise.
 
 H6 is an EXTENSION. It is attempted only after the Week 3 core has shipped.
+
+### 2026-09-18 — Target column present in the feature table (correction; results seen)
+
+`src/features.py` writes the target `y_t6` into the feature table, contrary to
+`docs/harness_design.md` §1, which states the feature table contains inputs only.
+
+Found during W2.5, after F0–F3 had been scored. Mitigated in `src/forecast.py`
+via an explicit `EXCLUDE` list plus assertions that no excluded column reaches
+the model, rather than re-running W1 ingestion and feature construction.
+
+The mitigation is at the consumer, not the producer, so the leak is contained
+but not removed at source. Any future consumer of the feature table must apply
+the same exclusion. Recorded here rather than silently fixed because the
+discovery post-dates the scored results.
+
+### 2026-09-18 — Walk-forward harness geometry (pre-registration recorded late; results seen)
+
+The harness geometry was fixed in code during W2.4 but never written into this
+spec. Recording it now, after F0–F3 results were seen. Tagged accordingly: this
+is a record of what was built, not a pre-registration.
+
+- Expanding training window (not rolling).
+- Purge applied with `<=` at the fold boundary.
+- Holdout guard keyed on target time (t+6h), not origin time.
+- 20 folds; 17,515 / 59,155 / 2,202 as verified in W2.4.
+
+Geometry is frozen from this point. Any change requires a new dated entry.
+
+### 2026-09-18 — W2.8 deferred to EXTENSIONS (scope; results seen)
+
+The Mode A vs Mode B optimism-gap figure (Part 15, Week 2) is deferred to
+EXTENSIONS so that W3 can begin. Mode B remains the headline throughout, so the
+core result is unaffected; what is lost is the diagnostic figure quantifying how
+much better the numbers look when observed weather at prediction time is used.
+
+Decided after F0–F3 Mode B results were seen. Deferral is on time grounds
+against the end-of-September deadline, not on results.
