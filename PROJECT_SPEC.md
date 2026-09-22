@@ -951,3 +951,28 @@ The classifier outputs a probability. Converting it to a routing decision is
 W3.4 and uses a threshold fitted on training folds only.
 
 Written before any watcher was trained.
+
+### 2026-09-22 — W3.4 routing rules (pre-registration; W3.3 results seen, no routing results seen)
+
+Written after the W3.3 watcher results (mean PR-AUC 0.207 vs 0.186 baseline)
+and before any routing code was run.
+
+- Fallback: F0 (persistence).
+- Routing share: q = 0.20 in every test fold, fixed in advance, not tuned.
+  The full range of shares is reported separately as the W3.5 risk–coverage curve.
+- Coverage matching: every rule routes exactly the top 20% of hours by its own
+  score, ranked within each test fold.
+  - R0: random, seed 42
+  - R1: F3's predicted PM2.5
+  - R2: resid_mae_24h
+  - R3: p_unreliable
+- Disclosed caveat: ranking within a fold uses the spread of scores later in
+  that quarter (never the truth). It is fair for comparing rules but not
+  something a live system could do.
+- Expected failure mode, stated in advance: the watcher detects hours where F3
+  missed badly, not hours where persistence would have done better. On
+  fast-changing hours both miss, so R3 can have PR-AUC above baseline and still
+  fail to lower MAE.
+- No difference counts as a win until the W3.6 bootstrap interval excludes zero.
+- - These routing flags (top 20% per fold, per rule) are also the distrust
+  flags used for H6 at every station. H6 does not get its own threshold.
