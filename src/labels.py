@@ -28,6 +28,11 @@ file was written.
 
 Convention: label = 1 iff abs_err exceeds the cut-off. Strictly greater, in both
 fit and apply. Ties fall on the reliable side.
+
+Robustness mode (added W3.5, 2026-09-22): mode="relative" labels by the Part 8
+relative error |y - yhat| / max(yhat, floor) with one global cut-off. The
+unstratified form was chosen after the primary results were seen; the write-up
+says so.
 """
 
 from __future__ import annotations
@@ -184,10 +189,58 @@ def apply_labels(
     return labels
 
 
+def relative_error(pred: pd.Series, actual: pd.Series, floor: float) -> pd.Series:
+    """The Part 8 robustness definition: absolute error over max(pred, floor).
+
+    The floor stops small denominators exploding. It comes from thr.floor, i.e.
+    from the fitting set, never from the rows being scored.
+    """
+    return (actual - pred).abs() / np.maximum(pred, floor)
+
+
+def fit_relative_thresholds(
+    pred: pd.Series,
+    actual: pd.Series,
+    q: float = Q,
+) -> LabelThresholds:
+    """Part 8 robustness labels: one global cut-off on relative error.
+
+    Unstratified: dividing by the prediction already adjusts for concentration,
+    so binning again would adjust twice. Floor and cut-off both come from the
+    fitting set only, exactly like the primary thresholds.
+    """
+    pred, actual = _clean(pred, actual)
+    if len(pred) == 0:
+        raise ValueError("no usable rows: every row had a missing pred or actual")
+    floor = float(pred.quantile(FLOOR_Q))
+    cutoff = float(relative_error(pred, actual, floor).quantile(q))
+    return LabelThresholds(
+        edges=np.array([-np.inf, np.inf]),   # one bin covering everything
+        cutoffs=np.array([cutoff]),
+        floor=floor,
+        n_bins_realised=1,
+        n_fit_rows=len(pred),
+        q=q,
+    )
+
+
+def apply_relative_labels(
+    pred: pd.Series,
+    actual: pd.Series,
+    thr: LabelThresholds,
+) -> pd.Series:
+    """Relative-error labels with FROZEN floor and cut-off. Estimates nothing."""
+    rel = relative_error(pred, actual, thr.floor)
+    labels = rel.gt(thr.cutoffs[0]).astype("Int8")
+    labels[pred.isna() | actual.isna()] = pd.NA
+    return labels
+
+
 def label_walk_forward(
     oof: pd.DataFrame,
     pred_col: str = "yhat_F3",
     actual_col: str = "y_true",
+    mode: str = "stratified",
 ) -> tuple[pd.Series, pd.DataFrame]:
     """Label every fold using thresholds fitted only on EARLIER folds.
 
@@ -205,6 +258,8 @@ def label_walk_forward(
     burn-in Part 10 warns about — the watcher's first scoreable fold is one
     behind F3's. It is reported, not worked around.
 
+    mode: "stratified" (primary) or "relative" (Part 8 robustness check).
+
     Returns
     -------
     labels : Int8 Series aligned to oof.index; pd.NA for fold 1 and for any row
@@ -212,6 +267,9 @@ def label_walk_forward(
     diag   : one row per fold. The realised positive rate is the pre-registered
              drift measurement, so this frame is a deliverable, not debug output.
     """
+    if mode not in ("stratified", "relative"):
+        raise ValueError(f"mode must be 'stratified' or 'relative', got {mode!r}")
+
     labels = pd.Series(pd.NA, index=oof.index, dtype="Int8")
     diag_rows: list[dict] = []
 
@@ -232,8 +290,12 @@ def label_walk_forward(
             })
             continue
 
-        thr = fit_label_thresholds(fit[pred_col], fit[actual_col])
-        fold_labels = apply_labels(test[pred_col], test[actual_col], thr)
+        if mode == "relative":
+            thr = fit_relative_thresholds(fit[pred_col], fit[actual_col])
+            fold_labels = apply_relative_labels(test[pred_col], test[actual_col], thr)
+        else:
+            thr = fit_label_thresholds(fit[pred_col], fit[actual_col])
+            fold_labels = apply_labels(test[pred_col], test[actual_col], thr)
 
         # Align by index, never by position. test is a filtered view of oof, so
         # its index carries the original row identities.
@@ -259,15 +321,6 @@ def label_walk_forward(
         })
 
     return labels, pd.DataFrame(diag_rows).set_index("fold")
-
-
-def relative_error(pred: pd.Series, actual: pd.Series, floor: float) -> pd.Series:
-    """The Part 8 robustness definition: absolute error over max(pred, floor).
-
-    The floor stops small denominators exploding. It comes from thr.floor, i.e.
-    from the fitting set, never from the rows being scored.
-    """
-    return (actual - pred).abs() / np.maximum(pred, floor)
 
 
 if __name__ == "__main__":

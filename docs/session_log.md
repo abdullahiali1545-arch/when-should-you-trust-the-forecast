@@ -276,3 +276,28 @@ the W1 station audit. Fold 4 is retained and reported with n_test alongside.
    R3-R2 = -0.031, R3-R1 = -0.048: no claim until the W3.6 bootstrap.
    Next: W3.5 risk-coverage curve + AURC.
 
+   ### 2026-09-22 — W3.5 evaluation choices (clarification; W3.4 results seen, no W3.5 results seen)
+
+   Written after the W3.4 routing headline and before any risk-coverage result.
+
+   - Correction to the W3.4 entry: a risk-coverage curve measures F3's error on
+     retained hours, not the routed system's MAE. The promised sweep over shares
+     is therefore reported as a separate routing sweep (whole-system MAE at
+     shares 0 to 1 in steps of 0.05), alongside the risk-coverage curve.
+   - Ranking: within each test fold (as W3.4), then pooled.
+   - AURC: computed over every hour, not a coarse grid.
+   - Oracle curves (ranking by F3's true error, and by g) are shown as
+     yardsticks only. They use the truth and are not rules.
+   - The W3.4 headline stays at q = 0.20. The sweep does not replace it.
+
+   ## 2026-09-22 — Part 8 relative-error robustness check, MY1
+
+   Relative labels (unstratified, floor = 10th pct of yhat on fitting set).
+   Label form fixed AFTER primary results were seen; not pre-registered.
+   Overlap with stratified positives 90.6%.
+   Watcher PR-AUC 0.198 vs 0.183 (lift 1.09x), 16/18 folds above baseline.
+   R3 routed MAE 3.718 (primary 3.772): still worse than always-ML 3.514 and R0 3.682.
+   No share 0.05-0.95 beats always-ML. Headline conclusion unchanged.
+   R3 raw-error AURC 3.531, worse than R0 3.480: raw-error AURC tracks
+   pollution level (Part 8 bias), so PR-AUC is the fairer ranking measure.
+   Next: W3.6 block bootstrap + README, then STOP AND SHIP.

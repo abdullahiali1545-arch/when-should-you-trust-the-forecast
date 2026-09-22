@@ -12,10 +12,12 @@ Division of labour
   Boilerplate (loading, joining, scoring, saving): written for you.
   route(): YOURS. It is the routing policy and it is viva-critical.
 
-Run:  python -m src.routing
+Run:  python -m src.routing              (primary, stratified labels)
+      python -m src.routing --relative   (Part 8 robustness check)
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -24,13 +26,16 @@ import pandas as pd
 from src.watcher import build_all_fold_features
 
 # ---------------------------------------------------------------- paths
+# --relative switches to the Part 8 robustness labels (watcher_rel file)
+LABEL_MODE = "relative" if "--relative" in sys.argv else "stratified"
+SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATION = "MY1"
 OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof.parquet"
-WATCHER_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher.parquet"
+WATCHER_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher{SUFFIX}.parquet"
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"
-OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed.parquet"
-TABLE_PATH = REPO_ROOT / "results" / f"{STATION}_routing_headline.csv"
+OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed{SUFFIX}.parquet"
+TABLE_PATH = REPO_ROOT / "results" / f"{STATION}_routing_headline{SUFFIX}.csv"
 
 # ---------------------------------------------------------- pre-registered
 Q = 0.20
@@ -200,7 +205,7 @@ def main() -> None:
     table, published = score_rules(df, make_scores(df))
 
     print("\n" + "=" * 72)
-    print(f"W3.4 headline at {STATION}, q = {Q}, fallback = F0")
+    print(f"W3.4 headline at {STATION}, q = {Q}, fallback = F0, labels = {LABEL_MODE}")
     print("=" * 72)
     print(table.round(4).to_string())
     print("\nmean_g_routed > 0 means the rule picked hours where persistence beat F3.")
