@@ -263,3 +263,16 @@ Cause is the MY1 PM2.5 instrument, not feature construction — every null colum
 is pm2_5-derived; weather is complete. Raw pm2_5 null 78.4% across the quarter:
 Oct 58.9%, Nov 100%, Dec 77.2%. Consistent with the 78.7% coverage figure from
 the W1 station audit. Fold 4 is retained and reported with n_test alongside.
+
+   ## 2026-09-22 — W3.4 routing, MY1
+
+   Pre-registered rules committed before the run (q=0.20, F0 fallback,
+   within-fold ranking, seed 42).
+   Result: every rule worse than always-ML (MAE 3.514).
+   R0 random 3.682, R3 3.772, R2 3.803, R1 3.819, always-fallback 4.367.
+   Mean g on routed hours: R0 -0.84, R3 -1.29, R2 -1.44, R1 -1.52. The
+   informed rules pick hours where persistence is worse than average,
+   which is the pre-registered failure mode.
+   R3-R2 = -0.031, R3-R1 = -0.048: no claim until the W3.6 bootstrap.
+   Next: W3.5 risk-coverage curve + AURC.
+
