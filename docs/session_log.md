@@ -301,3 +301,12 @@ the W1 station audit. Fold 4 is retained and reported with n_test alongside.
    R3 raw-error AURC 3.531, worse than R0 3.480: raw-error AURC tracks
    pollution level (Part 8 bias), so PR-AUC is the fairer ranking measure.
    Next: W3.6 block bootstrap + README, then STOP AND SHIP.
+   ## 2026-09-22 — W3.6 block bootstrap, MY1
+
+   219 week-long blocks, 2000 resamples, seed 42, paired (same weeks score both).
+   Primary labels: R3-always_ML +0.257 [0.209, 0.310] worse. R3-R0 +0.090
+   [0.047, 0.134] worse than random. R3-R1 -0.048 [-0.092, -0.003] marginal.
+   R3-R2 -0.031 [-0.073, +0.010] NO DETECTABLE DIFFERENCE — the Part 9 null.
+   Relative labels: R3-R2 -0.085 [-0.158, -0.023] detectable, but robustness
+   check only, label form chosen after primary results. Report both.
+   CORE COMPLETE. Next: README, then ship.
