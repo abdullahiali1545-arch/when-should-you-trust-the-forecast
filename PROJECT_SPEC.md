@@ -976,3 +976,25 @@ and before any routing code was run.
 - No difference counts as a win until the W3.6 bootstrap interval excludes zero.
 - - These routing flags (top 20% per fold, per rule) are also the distrust
   flags used for H6 at every station. H6 does not get its own threshold.
+
+### 2026-09-24 — Holdout run procedure (pre-registration; walk-forward results seen, no 2025 results seen)
+
+The 2026-08-29 entry fixed the holdout year but not how it is run. Specified now, before any holdout code exists.
+
+**Contact with 2025 since sealing.** 2026-09-24: printed the shape and index range of `data/features/MY1.parquet` to confirm 2025 timestamps are present. No 2025 values inspected.
+
+**Method: the same pipeline, four more folds.** The walk-forward harness is extended from 20 to 24 quarterly folds (2025Q1–Q4). Nothing else changes: expanding window, refit every fold, same purge, same features, same F0–F3 and watcher settings, stratified labels fitted per fold on training data, watcher trained on out-of-fold F3 residuals only. Reusing the tested pipeline keeps the holdout comparable with folds 1–20 and avoids new code paths.
+
+**Holdout rows.** Origins whose target time t+6h falls in 2025, keyed on target time as in the 2026-09-14 harness geometry. Folds 1–20 keep exactly their existing scored rows.
+
+**Regression check before reading anything.** Folds 1–20 must reproduce the committed walk-forward results (F3 MAE 3.577 over 35,799 rows; routing over folds 3–20 as in `results/MY1_routing_headline.csv`). If they do not, the cause is fixed before any fold 21–24 number is looked at.
+
+**Routing.** R0–R3 exactly as registered 2026-09-22: fallback F0, q = 0.20 routed per fold by ranking within each test fold, R0 seed 42.
+
+**Scoring.** Folds 21–24 only, MY1, primary (stratified) labels only. MAE for always-ML, always-fallback and R0–R3; watcher PR-AUC against the realised positive rate; paired block bootstrap with week-long blocks, 2,000 resamples, seed 42, same interval level as W3.6. Same win condition: a difference counts only if its interval excludes zero.
+
+**Not run on the holdout.** Relative-error labels, routing-share sweep, risk–coverage/AURC, other stations.
+
+**Expectation stated in advance.** The holdout has about a fifth of the walk-forward's scored hours (roughly 52 week-long blocks against 219), so its intervals will be wider. "No detectable difference" is more likely on the holdout for that reason alone, and will be reported as such rather than as a contradiction.
+
+**Once.** If the run fails with an error before producing results, the error is fixed, recorded here, and the run repeated. Once any fold 21–24 result has been produced, it stands. Any later change is recorded with a "holdout results seen" tag, and the first result remains the one reported.
