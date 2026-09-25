@@ -17,9 +17,14 @@ about 190 independent weeks. That mistake makes intervals far too narrow.
 
 Run:  python -m src.bootstrap              (primary labels)
       python -m src.bootstrap --relative   (Part 8 robustness labels)
+      python -m src.bootstrap --holdout    (2025 holdout: THE ONE READING)
 
 Reads the published forecasts written by src/routing.py, so it never refits a
 model and never touches y beyond scoring.
+
+--holdout (PROJECT_SPEC changelog 2026-09-24): this is where the holdout is read,
+once. It prints the bootstrap table, the routing table and the watcher PR-AUC
+for folds 21-24 together.
 """
 from __future__ import annotations
 
@@ -29,13 +34,22 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+HOLDOUT = "--holdout" in sys.argv                                              # [HOLDOUT]
+if HOLDOUT and "--relative" in sys.argv:                                       # [HOLDOUT]
+    raise SystemExit("--holdout is pre-registered for primary labels only; drop --relative")
 LABEL_MODE = "relative" if "--relative" in sys.argv else "stratified"
-SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
+if HOLDOUT:                                                                    # [HOLDOUT]
+    SUFFIX = "_holdout"
+else:
+    SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATION = "MY1"
 ROUTED_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed{SUFFIX}.parquet"
 OUT_PATH = REPO_ROOT / "results" / f"{STATION}_bootstrap{SUFFIX}.csv"
+ROUTING_TABLE_HOLDOUT = REPO_ROOT / "results" / f"{STATION}_routing_headline_holdout.csv"  # [HOLDOUT]
+WATCHER_DIAG_HOLDOUT = REPO_ROOT / "results" / f"{STATION}_watcher_diag_holdout.csv"      # [HOLDOUT]
+HOLDOUT_FOLDS = [21, 22, 23, 24]                                               # [HOLDOUT]
 
 TRUTH = "y_true"
 BLOCK_HOURS = 168
@@ -132,11 +146,19 @@ def _toy_test() -> None:
 def load_published() -> tuple[pd.DataFrame, np.ndarray]:
     """Published forecasts per rule, plus a week number for every hour."""
     df = pd.read_parquet(ROUTED_PATH).sort_values("origin").reset_index(drop=True)
+
+    # [HOLDOUT] The holdout file must contain folds 21-24 and nothing else.
+    if HOLDOUT:
+        folds = sorted(df["fold"].unique())
+        if folds != HOLDOUT_FOLDS:
+            raise AssertionError(f"holdout file has folds {folds}, expected {HOLDOUT_FOLDS}")
+
     origin = pd.DatetimeIndex(df["origin"])
     hours_since_start = (origin - origin.min()) // pd.Timedelta("1h")
     block_id = (hours_since_start // BLOCK_HOURS).to_numpy()
     print(f"{len(df):,} hours, {len(np.unique(block_id)):,} week-long blocks, "
-          f"labels = {LABEL_MODE}")
+          f"labels = {LABEL_MODE}{' (HOLDOUT 2025)' if HOLDOUT else ''}")
+    # 'fold' is not a forecast; keep it out of the systems list below.
     return df, block_id
 
 
@@ -170,7 +192,8 @@ def main() -> None:
     table = pd.DataFrame(rows)
     print("\n" + "=" * 78)
     print(f"W3.6 block bootstrap at {STATION}: {N_RESAMPLES} resamples, "
-          f"{BLOCK_HOURS}h blocks, seed {SEED}")
+          f"{BLOCK_HOURS}h blocks, seed {SEED}"
+          f"{'  —  HOLDOUT 2025 (folds 21-24)' if HOLDOUT else ''}")
     print("=" * 78)
     print(table.round(4).to_string(index=False))
     print("\ndiff_MAE = MAE(A) - MAE(B). Negative means A is better.")
@@ -179,6 +202,25 @@ def main() -> None:
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(OUT_PATH, index=False)
     print(f"\nwritten: {OUT_PATH}")
+
+    # [HOLDOUT] The rest of the one reading: routing table and watcher PR-AUC.
+    if HOLDOUT:
+        print("\n" + "=" * 78)
+        print("HOLDOUT routing table (folds 21-24)")
+        print("=" * 78)
+        print(pd.read_csv(ROUTING_TABLE_HOLDOUT, index_col=0).round(4).to_string())
+
+        diag = pd.read_csv(WATCHER_DIAG_HOLDOUT, index_col=0)
+        print("\n" + "=" * 78)
+        print("HOLDOUT watcher PR-AUC (folds 21-24)")
+        print("=" * 78)
+        print(diag.round(4).to_string())
+        print(f"\nmean PR-AUC {diag['pr_auc'].mean():.4f}   "
+              f"mean baseline {diag['baseline'].mean():.4f}   "
+              f"mean lift {diag['lift'].mean():.3f}x   "
+              f"folds beating baseline {(diag['pr_auc'] > diag['baseline']).sum()} of {len(diag)}")
+        print(f"\nHoldout read {pd.Timestamp.now():%Y-%m-%d %H:%M}. "
+              "Record this date in PROJECT_SPEC.md. These numbers now stand.")
 
 
 if __name__ == "__main__":

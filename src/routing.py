@@ -14,6 +14,12 @@ Division of labour
 
 Run:  python -m src.routing              (primary, stratified labels)
       python -m src.routing --relative   (Part 8 robustness check)
+      python -m src.routing --holdout    (2025 holdout, folds 21-24; primary labels only)
+
+--holdout (PROJECT_SPEC changelog 2026-09-24): routes all folds exactly as the
+walk-forward run did, checks folds 3-20 are identical to the committed routed
+file, then scores folds 21-24 on their own. Prints NO 2025 numbers; they are
+read once, by src.bootstrap --holdout.
 """
 from __future__ import annotations
 
@@ -27,15 +33,24 @@ from src.watcher import build_all_fold_features
 
 # ---------------------------------------------------------------- paths
 # --relative switches to the Part 8 robustness labels (watcher_rel file)
+# --holdout switches to the 2025 holdout files (primary labels only)
+HOLDOUT = "--holdout" in sys.argv                                              # [HOLDOUT]
+if HOLDOUT and "--relative" in sys.argv:                                       # [HOLDOUT]
+    raise SystemExit("--holdout is pre-registered for primary labels only; drop --relative")
 LABEL_MODE = "relative" if "--relative" in sys.argv else "stratified"
-SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
+if HOLDOUT:                                                                    # [HOLDOUT]
+    SUFFIX = "_holdout"
+else:
+    SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATION = "MY1"
-OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof.parquet"
+OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof{'_holdout' if HOLDOUT else ''}.parquet"  # [HOLDOUT]
 WATCHER_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher{SUFFIX}.parquet"
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"
 OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed{SUFFIX}.parquet"
 TABLE_PATH = REPO_ROOT / "results" / f"{STATION}_routing_headline{SUFFIX}.csv"
+COMMITTED_ROUTED_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed.parquet"   # [HOLDOUT]
+N_WALK_FORWARD_FOLDS = 20                                                      # [HOLDOUT]
 
 # ---------------------------------------------------------- pre-registered
 Q = 0.20
@@ -199,9 +214,54 @@ def score_rules(df: pd.DataFrame, scores: dict[str, pd.Series]) -> tuple[pd.Data
     return table, published
 
 
+# =====================================================================
+#  [HOLDOUT] Holdout branch
+# =====================================================================
+def main_holdout(df: pd.DataFrame) -> None:
+    # Scores for ALL folds, in the same row order as the walk-forward run, so
+    # R0's seed-42 draws for folds 3-20 are the same numbers as before.
+    scores = make_scores(df)
+    _, published_all = score_rules(df, scores)
+
+    # Regression check: folds 3-20 routed exactly as in the committed run.
+    if not COMMITTED_ROUTED_PATH.exists():
+        raise FileNotFoundError(f"{COMMITTED_ROUTED_PATH} not found; nothing to compare against")
+    committed = pd.read_parquet(COMMITTED_ROUTED_PATH).reset_index(drop=True)
+    new = published_all.loc[published_all["fold"].le(N_WALK_FORWARD_FOLDS)].reset_index(drop=True)
+    pd.testing.assert_frame_equal(new, committed, check_exact=True)
+    print(f"\nregression check PASSED: folds up to {N_WALK_FORWARD_FOLDS} identical "
+          f"to {COMMITTED_ROUTED_PATH.name} ({len(committed):,} rows)")
+
+    # The holdout on its own: folds 21-24 only. Routing is per fold, so these
+    # decisions are the same as in published_all; scoring them alone keeps
+    # 2025 from being averaged in with the walk-forward years.
+    df_h = df.loc[df["fold"].gt(N_WALK_FORWARD_FOLDS)]
+    scores_h = {name: s.loc[df_h.index] for name, s in scores.items()}
+    table_h, published_h = score_rules(df_h, scores_h)
+
+    folds = sorted(published_h["fold"].unique())
+    expected = list(range(N_WALK_FORWARD_FOLDS + 1, N_WALK_FORWARD_FOLDS + 5))
+    if folds != expected:
+        raise AssertionError(f"holdout routed folds are {folds}, expected {expected}")
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    TABLE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    published_h.to_parquet(OUT_PATH)
+    table_h.to_csv(TABLE_PATH)
+    print(f"holdout rows routed and saved: {len(published_h):,} (folds {folds})")
+    print(f"written: {OUT_PATH}")
+    print(f"written: {TABLE_PATH}")
+    print("No 2025 numbers printed. They are read once, by src.bootstrap --holdout.")
+
+
 def main() -> None:
     _toy_test()
     df = load_inputs()
+
+    if HOLDOUT:                                                                # [HOLDOUT]
+        main_holdout(df)
+        return
+
     table, published = score_rules(df, make_scores(df))
 
     print("\n" + "=" * 72)

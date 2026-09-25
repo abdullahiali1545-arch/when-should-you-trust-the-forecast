@@ -26,11 +26,18 @@ says "trust" scores 81% while detecting nothing. The no-skill baseline for
 PR-AUC is the fold's own positive rate, and that is reported alongside every
 score.
 
-Run from the repo root:   python -m src.watcher
+Run from the repo root:
+    python -m src.watcher              # walk-forward, folds 1-20 (unchanged)
+    python -m src.watcher --holdout    # reads the 24-fold OOF file (2025 = folds 21-24)
+
+--holdout (PROJECT_SPEC changelog 2026-09-24): checks folds 1-20 are identical
+to the committed watcher file, saves to separate files, and prints NO 2025
+numbers. Holdout results are read once, by src.bootstrap --holdout.
 """
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -41,11 +48,19 @@ from sklearn.metrics import average_precision_score
 from src.labels import label_walk_forward
 from src.watcher_features import build_watcher_features
 
+# [HOLDOUT] Only affects the paths used when this file is run directly.
+# Importing build_all_fold_features from elsewhere is unaffected.
+HOLDOUT = "--holdout" in sys.argv
+N_WALK_FORWARD_FOLDS = 20
+_SUFFIX = "_holdout" if HOLDOUT else ""
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATION = "MY1"
-OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof.parquet"
+OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof{_SUFFIX}.parquet"           # [HOLDOUT]
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"
-OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher.parquet"
+OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher{_SUFFIX}.parquet"       # [HOLDOUT]
+COMMITTED_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher.parquet"          # [HOLDOUT]
+DIAG_HOLDOUT_PATH = REPO_ROOT / "results" / f"{STATION}_watcher_diag_holdout.csv"  # [HOLDOUT]
 
 # Pre-registered 2026-09-18. NOT tuned against PR-AUC. Deliberately smaller
 # than F3: the training set is a fraction of F3's and carries ~20% positives,
@@ -104,6 +119,7 @@ def run_watcher(
     feats: pd.DataFrame,
     labels: pd.Series,
     params: dict = WATCHER_PARAMS,
+    quiet_above: int | None = None,             # [HOLDOUT] don't print folds above this
 ) -> tuple[pd.Series, pd.DataFrame, pd.DataFrame]:
     """Walk-forward watcher. Train on folds 2..k-1, predict fold k.
 
@@ -185,8 +201,15 @@ def run_watcher(
             "lift": pr / base if base > 0 else np.nan,
         })
         importances.append(pd.Series(model.feature_importances_, index=X_train.columns))
-        print(f"  fold {k:>2}: train {len(y_train):>6,}  test {len(y_test):>5,}  "
-              f"PR-AUC {pr:.3f}  baseline {base:.3f}  lift {pr / base:.2f}")
+
+        # [HOLDOUT] Holdout folds train and score as normal, but their numbers
+        # are not printed here.
+        if quiet_above is not None and k > quiet_above:
+            print(f"  fold {k:>2}: train {len(y_train):>6,}  test {len(y_test):>5,}  "
+                  f"(holdout fold: scores saved, not printed)")
+        else:
+            print(f"  fold {k:>2}: train {len(y_train):>6,}  test {len(y_test):>5,}  "
+                  f"PR-AUC {pr:.3f}  baseline {base:.3f}  lift {pr / base:.2f}")
 
     diag = pd.DataFrame(diag_rows).set_index("fold")
     imp = (pd.concat(importances, axis=1).mean(axis=1)
@@ -194,9 +217,55 @@ def run_watcher(
     return proba, diag, imp
 
 
+# ---------------------------------------------------------------------------
+# [HOLDOUT] The holdout branch of the script
+# ---------------------------------------------------------------------------
+def main_holdout(oof: pd.DataFrame, feats: pd.DataFrame) -> None:
+    labels, _ = label_walk_forward(oof)
+
+    # Label counts for folds 1-20 only. The 2025 positive rate is a property of
+    # F3's 2025 errors, so it stays unprinted until the one reading.
+    wf = oof["fold"].le(N_WALK_FORWARD_FOLDS).to_numpy()
+    lab_wf = pd.Series(labels.to_numpy()[wf])
+    print(f"labels (folds 1-{N_WALK_FORWARD_FOLDS} only): {lab_wf.notna().sum():,} "
+          f"of {len(lab_wf):,} rows, positive rate {lab_wf.mean():.4f}")
+
+    proba, diag, _ = run_watcher(oof, feats, labels, quiet_above=N_WALK_FORWARD_FOLDS)
+
+    out = oof[["station", "origin", "fold"]].copy()
+    out["label"] = labels.to_numpy()
+    out["p_unreliable"] = proba.to_numpy()
+
+    # Regression check: folds 1-20 must equal the committed watcher file exactly.
+    if not COMMITTED_PATH.exists():
+        raise FileNotFoundError(f"{COMMITTED_PATH} not found; nothing to compare against")
+    committed = pd.read_parquet(COMMITTED_PATH).reset_index(drop=True)
+    new = out.loc[out["fold"].le(N_WALK_FORWARD_FOLDS)].reset_index(drop=True)
+    pd.testing.assert_frame_equal(new, committed, check_exact=True)
+    print(f"\nregression check PASSED: folds 1-{N_WALK_FORWARD_FOLDS} identical "
+          f"to {COMMITTED_PATH.name} ({len(committed):,} rows)")
+
+    hold_diag = diag.loc[diag.index > N_WALK_FORWARD_FOLDS]
+    expected = list(range(N_WALK_FORWARD_FOLDS + 1, N_WALK_FORWARD_FOLDS + 5))
+    if list(hold_diag.index) != expected:
+        raise AssertionError(f"holdout watcher folds are {list(hold_diag.index)}, expected {expected}")
+
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DIAG_HOLDOUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    out.to_parquet(OUT_PATH)
+    hold_diag.to_csv(DIAG_HOLDOUT_PATH)
+    print(f"written: {OUT_PATH}")
+    print(f"written: {DIAG_HOLDOUT_PATH}")
+    print("No 2025 numbers printed. They are read once, by src.bootstrap --holdout.")
+
+
 if __name__ == "__main__":
     oof = pd.read_parquet(OOF_PATH)
     feats = pd.read_parquet(FEATURES_PATH)
+
+    if HOLDOUT:                                          # [HOLDOUT]
+        main_holdout(oof, feats)
+        sys.exit(0)
 
     labels, label_diag = label_walk_forward(oof)
     print(f"labels: {labels.notna().sum():,} of {len(labels):,} rows, "
