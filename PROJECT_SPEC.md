@@ -998,3 +998,11 @@ The 2026-08-29 entry fixed the holdout year but not how it is run. Specified now
 **Expectation stated in advance.** The holdout has about a fifth of the walk-forward's scored hours (roughly 52 week-long blocks against 219), so its intervals will be wider. "No detectable difference" is more likely on the holdout for that reason alone, and will be reported as such rather than as a contradiction.
 
 **Once.** If the run fails with an error before producing results, the error is fixed, recorded here, and the run repeated. Once any fold 21–24 result has been produced, it stands. Any later change is recorded with a "holdout results seen" tag, and the first result remains the one reported.
+
+### 2026-09-25 — Holdout read (holdout results seen)
+
+Read once, 2026-09-25 11:08, by `python -m src.bootstrap --holdout`, following the 2026-09-24 procedure without deviation. Regression checks passed before reading: F0–F3 out-of-fold predictions for folds 1–20 (35,799 rows), watcher for folds 1–20 (35,799 rows) and routed forecasts for folds 3–20 (31,572 rows), all identical to the committed walk-forward files. Holdout: 8,058 hours, 53 week-long blocks.
+
+Result: every rule detectably worse than always-ML (R3 +0.283 [+0.153, +0.409]). R3 vs R2 +0.026 [−0.042, +0.097], no detectable difference, as in the walk-forward. R3 vs R1 −0.004 [−0.074, +0.065], no detectable difference; the marginal walk-forward result did not repeat. R3 vs R0 +0.076 [−0.032, +0.188], no detectable difference. Watcher mean PR-AUC 0.225 vs baseline 0.207 (lift 1.08x, 3 of 4 folds).
+
+No change to code, settings or analysis after reading. Any later change is recorded here with a "holdout results seen" tag.
