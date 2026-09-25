@@ -20,6 +20,9 @@ Run:  python -m src.routing              (primary, stratified labels)
 walk-forward run did, checks folds 3-20 are identical to the committed routed
 file, then scores folds 21-24 on their own. Prints NO 2025 numbers; they are
 read once, by src.bootstrap --holdout.
+
+[W4a] Any of these also takes --station KC1 | BEX | HRL (default MY1).
+    e.g. python -m src.routing --station KC1
 """
 from __future__ import annotations
 
@@ -43,7 +46,25 @@ if HOLDOUT:                                                                    #
 else:
     SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
 REPO_ROOT = Path(__file__).resolve().parents[1]
-STATION = "MY1"
+# [W4a] --station picks the station; default MY1 keeps every earlier command unchanged.
+STATIONS = ("MY1", "KC1", "BEX", "HRL")
+
+
+def _station_from_argv(default: str = "MY1") -> str:
+    if "--station" not in sys.argv:
+        return default
+    i = sys.argv.index("--station")
+    if i + 1 >= len(sys.argv):
+        raise SystemExit("--station needs a value, e.g. --station KC1")
+    s = sys.argv[i + 1].upper()
+    if s not in STATIONS:
+        raise SystemExit(f"unknown station {s!r}; choose from {STATIONS}")
+    return s
+
+
+STATION = _station_from_argv()
+if "--holdout" in sys.argv and STATION != "MY1":
+    raise SystemExit("the 2025 holdout is pre-registered for MY1 only (PROJECT_SPEC 2026-09-24)")
 OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof{'_holdout' if HOLDOUT else ''}.parquet"  # [HOLDOUT]
 WATCHER_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher{SUFFIX}.parquet"
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"

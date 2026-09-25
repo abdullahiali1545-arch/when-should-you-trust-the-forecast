@@ -33,6 +33,9 @@ Run from the repo root:
 --holdout (PROJECT_SPEC changelog 2026-09-24): checks folds 1-20 are identical
 to the committed watcher file, saves to separate files, and prints NO 2025
 numbers. Holdout results are read once, by src.bootstrap --holdout.
+
+[W4a] Any of these also takes --station KC1 | BEX | HRL (default MY1).
+    e.g. python -m src.watcher --station KC1
 """
 
 from __future__ import annotations
@@ -55,7 +58,25 @@ N_WALK_FORWARD_FOLDS = 20
 _SUFFIX = "_holdout" if HOLDOUT else ""
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-STATION = "MY1"
+# [W4a] --station picks the station; default MY1 keeps every earlier command unchanged.
+STATIONS = ("MY1", "KC1", "BEX", "HRL")
+
+
+def _station_from_argv(default: str = "MY1") -> str:
+    if "--station" not in sys.argv:
+        return default
+    i = sys.argv.index("--station")
+    if i + 1 >= len(sys.argv):
+        raise SystemExit("--station needs a value, e.g. --station KC1")
+    s = sys.argv[i + 1].upper()
+    if s not in STATIONS:
+        raise SystemExit(f"unknown station {s!r}; choose from {STATIONS}")
+    return s
+
+
+STATION = _station_from_argv()
+if "--holdout" in sys.argv and STATION != "MY1":
+    raise SystemExit("the 2025 holdout is pre-registered for MY1 only (PROJECT_SPEC 2026-09-24)")
 OOF_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof{_SUFFIX}.parquet"           # [HOLDOUT]
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"
 OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_watcher{_SUFFIX}.parquet"       # [HOLDOUT]

@@ -18,11 +18,15 @@ rather than seconds. With --holdout it refits 24 times.
     walk-forward file, and stops if they are not;
   * prints NO 2025 error numbers. Holdout results are read once, at the end,
     after routing and the bootstrap have run.
+
+[W4a] Any of these also takes --station KC1 | BEX | HRL (default MY1).
+    e.g. python -m src.run_forecast --station KC1
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -43,7 +47,25 @@ from src.forecast import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-STATION = "MY1"
+# [W4a] --station picks the station; default MY1 keeps every earlier command unchanged.
+STATIONS = ("MY1", "KC1", "BEX", "HRL")
+
+
+def _station_from_argv(default: str = "MY1") -> str:
+    if "--station" not in sys.argv:
+        return default
+    i = sys.argv.index("--station")
+    if i + 1 >= len(sys.argv):
+        raise SystemExit("--station needs a value, e.g. --station KC1")
+    s = sys.argv[i + 1].upper()
+    if s not in STATIONS:
+        raise SystemExit(f"unknown station {s!r}; choose from {STATIONS}")
+    return s
+
+
+STATION = _station_from_argv()
+if "--holdout" in sys.argv and STATION != "MY1":
+    raise SystemExit("the 2025 holdout is pre-registered for MY1 only (PROJECT_SPEC 2026-09-24)")
 FEATURES_PATH = REPO_ROOT / "data/features" / f"{STATION}.parquet"
 OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof.parquet"
 HOLDOUT_OUT_PATH = REPO_ROOT / "data/oof" / f"{STATION}_oof_holdout.parquet"   # [HOLDOUT]
@@ -158,7 +180,13 @@ def main() -> None:
         action="store_true",
         help="add 2025 as folds 21-24 (run once; see PROJECT_SPEC 2026-09-24)",
     )
+    parser.add_argument(
+        "--station",
+        default="MY1",
+        help="station code: MY1 (default), KC1, BEX or HRL",       # [W4a]
+    )
     args = parser.parse_args()
+    print(f"station: {STATION}")
 
     frame = load_frame(FEATURES_PATH)
 

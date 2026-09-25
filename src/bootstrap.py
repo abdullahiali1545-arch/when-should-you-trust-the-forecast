@@ -25,6 +25,9 @@ model and never touches y beyond scoring.
 --holdout (PROJECT_SPEC changelog 2026-09-24): this is where the holdout is read,
 once. It prints the bootstrap table, the routing table and the watcher PR-AUC
 for folds 21-24 together.
+
+[W4a] Any of these also takes --station KC1 | BEX | HRL (default MY1).
+    e.g. python -m src.bootstrap --station KC1
 """
 from __future__ import annotations
 
@@ -44,7 +47,25 @@ else:
     SUFFIX = "" if LABEL_MODE == "stratified" else "_rel"
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-STATION = "MY1"
+# [W4a] --station picks the station; default MY1 keeps every earlier command unchanged.
+STATIONS = ("MY1", "KC1", "BEX", "HRL")
+
+
+def _station_from_argv(default: str = "MY1") -> str:
+    if "--station" not in sys.argv:
+        return default
+    i = sys.argv.index("--station")
+    if i + 1 >= len(sys.argv):
+        raise SystemExit("--station needs a value, e.g. --station KC1")
+    s = sys.argv[i + 1].upper()
+    if s not in STATIONS:
+        raise SystemExit(f"unknown station {s!r}; choose from {STATIONS}")
+    return s
+
+
+STATION = _station_from_argv()
+if "--holdout" in sys.argv and STATION != "MY1":
+    raise SystemExit("the 2025 holdout is pre-registered for MY1 only (PROJECT_SPEC 2026-09-24)")
 ROUTED_PATH = REPO_ROOT / "data/oof" / f"{STATION}_routed{SUFFIX}.parquet"
 OUT_PATH = REPO_ROOT / "results" / f"{STATION}_bootstrap{SUFFIX}.csv"
 ROUTING_TABLE_HOLDOUT = REPO_ROOT / "results" / f"{STATION}_routing_headline_holdout.csv"  # [HOLDOUT]
