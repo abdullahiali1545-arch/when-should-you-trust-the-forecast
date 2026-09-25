@@ -1006,3 +1006,15 @@ Read once, 2026-09-25 11:08, by `python -m src.bootstrap --holdout`, following t
 Result: every rule detectably worse than always-ML (R3 +0.283 [+0.153, +0.409]). R3 vs R2 +0.026 [−0.042, +0.097], no detectable difference, as in the walk-forward. R3 vs R1 −0.004 [−0.074, +0.065], no detectable difference; the marginal walk-forward result did not repeat. R3 vs R0 +0.076 [−0.032, +0.188], no detectable difference. Watcher mean PR-AUC 0.225 vs baseline 0.207 (lift 1.08x, 3 of 4 folds).
 
 No change to code, settings or analysis after reading. Any later change is recorded here with a "holdout results seen" tag.
+
+### 2026-09-25 — W4a: per-station replication at KC1, BEX, HRL (pre-registration; MY1 walk-forward and holdout results seen, no results at KC1, BEX or HRL seen)
+
+**Aim.** Whether the MY1 result repeats at the three other stations that passed the coverage audit. Each station gets its own models trained on its own data. This is replication, not H4's leave-one-station-out transfer, which is not attempted in this project's timeframe.
+
+**Procedure.** Exactly the MY1 pipeline, run per station with `--station`: same 46 F3 features (all four feature files verified to have the same 48 columns and 70,128 rows), same F0–F3 settings, walk-forward folds 2020Q1–2024Q4, stratified labels, watcher settings as pre-registered 2026-09-18, routing R0–R3 at q = 0.20 with F0 as fallback and R0 seed 42, and the W3.6 bootstrap (week-long blocks, 2,000 resamples, seed 42, 95% percentile interval). No per-station tuning. Primary labels only: no relative labels, routing-share sweep or AURC at the new stations.
+
+**2025 stays sealed** at all stations.
+
+**Reporting.** All three stations are reported whatever they show, with the same win condition applied per station. No station is dropped after results are seen. If a station's pipeline fails for a data reason, the failure is reported rather than engineered around. Results are not pooled across stations.
+
+**Interpretation fixed in advance.** If R3 vs R2 includes zero at every station, the null replicates. If R3 beats R2 at a single station, that is reported as station-specific: MY1 is the only kerbside site, so station and site type cannot be separated. With four stations and eight comparisons each, some intervals may exclude zero by chance, so a win at one station is not treated as a general finding.
