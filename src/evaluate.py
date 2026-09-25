@@ -5,6 +5,9 @@ W2.3: canary test. W2.4: walk-forward harness.
 Specification: docs/harness_design.md — §6 for the canary, §§2-4 for the
 fold geometry (expanding window, purge at t + h <= a_k, holdout guard at
 t + h < H).
+
+Holdout run (PROJECT_SPEC changelog 2026-09-24): make_folds(include_holdout=True)
+extends the folds through 2025 as folds 21-24. Folds 1-20 are unchanged.
 """
 
 from __future__ import annotations
@@ -137,6 +140,10 @@ HORIZON = 6
 FIRST_TEST = pd.Timestamp("2020-01-01 00:00", tz="UTC")
 HOLDOUT_START = pd.Timestamp("2025-01-01 00:00", tz="UTC")
 
+# [HOLDOUT] End of the holdout year. Only used when include_holdout=True.
+# Pre-registered in PROJECT_SPEC changelog 2026-09-24.
+HOLDOUT_END = pd.Timestamp("2026-01-01 00:00", tz="UTC")
+
 
 def build_target(pm25: pd.Series, horizon: int = HORIZON) -> pd.Series:
     """y(t + horizon), aligned to origin t.
@@ -161,11 +168,18 @@ def make_folds(
     first_test: pd.Timestamp = FIRST_TEST,
     holdout_start: pd.Timestamp = HOLDOUT_START,
     horizon: int = HORIZON,
+    include_holdout: bool = False,              # [HOLDOUT] off = the original 20 folds
+    holdout_end: pd.Timestamp = HOLDOUT_END,    # [HOLDOUT]
 ) -> list[tuple[pd.DatetimeIndex, pd.DatetimeIndex]]:
     """Expanding-window quarterly folds with purge and holdout guard.
 
     Boundaries are timestamps, never row positions: the index has gaps, so row
     counts and elapsed time do not correspond.
+
+    include_holdout=False (default): folds stop at holdout_start, exactly as in
+    the walk-forward results. include_holdout=True: folds continue to
+    holdout_end. Each fold is guarded by the first wall at or after its start,
+    so folds before holdout_start are identical either way.
     """
     if index.tz is None:
         raise ValueError("index must be tz-aware UTC")
@@ -173,7 +187,9 @@ def make_folds(
     h = pd.Timedelta(hours=horizon)
     t0 = index.min()
 
-    bounds = pd.date_range(first_test, holdout_start, freq="QS", tz="UTC")
+    # [HOLDOUT] Where the fold boundaries stop.
+    last = holdout_end if include_holdout else holdout_start
+    bounds = pd.date_range(first_test, last, freq="QS", tz="UTC")
     folds: list[tuple[pd.DatetimeIndex, pd.DatetimeIndex]] = []
 
     for a_k, a_next in zip(bounds[:-1], bounds[1:]):
@@ -182,10 +198,15 @@ def make_folds(
         # a_k; this removes h - 1 = 5 rows per fold.
         train = index[(index >= t0) & (index + h <= a_k)]
 
+        # [HOLDOUT] Which wall guards this fold. Folds starting before 2025 keep
+        # the 2025 wall, so fold 20 still excludes the last 6 origins of 2024
+        # (their targets are in 2025). Folds starting in 2025 use the 2026 wall.
+        wall = holdout_start if a_k < holdout_start else holdout_end
+
         # Holdout guard, stated on TARGET time. An origin-based guard would
         # score the last 6 origins of 2024 against 2025 truth.
         test = index[
-            (index >= a_k) & (index < a_next) & (index + h < holdout_start)
+            (index >= a_k) & (index < a_next) & (index + h < wall)
         ]
 
         if len(train) == 0 or len(test) == 0:
@@ -193,7 +214,7 @@ def make_folds(
 
         assert train.max() + h <= a_k, "purge violated"
         assert test.min() >= a_k, "test row before fold start"
-        assert test.max() + h < holdout_start, "holdout guard violated"
+        assert test.max() + h < wall, "holdout guard violated"
         assert train.max() < test.min(), "train/test overlap"
 
         folds.append((train, test))
@@ -222,6 +243,7 @@ def run_walk_forward(
     horizon: int = HORIZON,
     first_test: pd.Timestamp = FIRST_TEST,
     holdout_start: pd.Timestamp = HOLDOUT_START,
+    include_holdout: bool = False,              # [HOLDOUT] passed through to make_folds
 ) -> pd.DataFrame:
     """Out-of-fold predictions for one station.
 
@@ -236,7 +258,14 @@ def run_walk_forward(
     frame = frame.sort_index()
     h = pd.Timedelta(hours=horizon)
 
-    folds = make_folds(frame.index, first_test, holdout_start, horizon)
+    # [HOLDOUT] keywords, so the new argument can't be passed in the wrong slot
+    folds = make_folds(
+        frame.index,
+        first_test=first_test,
+        holdout_start=holdout_start,
+        horizon=horizon,
+        include_holdout=include_holdout,
+    )
     rows: list[pd.DataFrame] = []
 
     for k, (train_idx, test_idx) in enumerate(folds, start=1):
