@@ -1,12 +1,12 @@
 # When Should You Trust the Forecast?
 
-I built a six-hour PM2.5 forecaster for Marylebone Road in London, then a second model (the "watcher") that tries to predict, before the real value arrives, when the forecaster is about to be unusually wrong. When the watcher distrusted a forecast, the system switched to a simple fallback. I tested whether this made the overall system more accurate.
+I built a six-hour PM2.5 forecaster for London, starting with Marylebone Road, then a second model (the "watcher") that tries to predict, before the real value arrives, when the forecaster is about to be unusually wrong. When the watcher distrusted a forecast, the system switched to a simple fallback. I tested whether this made the overall system more accurate, at four monitoring stations and on a held-out year.
 
-**It did not.** Every switching rule made the system worse than always using the forecaster, and the watcher was not detectably better than the simple rule "switch when the last forecast was bad."
+**It did not.** Switching distrusted forecasts to the fallback made the forecast worse at all four stations I tested. The watcher did less harm than simple switching rules at three of the four, but it never beat always using the model, or even switching at random.
 
 ![Headline result](results/figures/MY1_headline.png)
 
-*Each point is a difference in mean absolute error (MAE) with a block-bootstrap confidence interval. Right of zero means worse. A hollow grey point means the interval includes zero, so there is no detectable difference.*
+*Main station (MY1, Marylebone Road). Each point is a difference in mean absolute error (MAE) with a 95% block-bootstrap confidence interval. Right of zero means worse. A hollow grey point means the interval includes zero, so there is no detectable difference.*
 
 ---
 
@@ -28,6 +28,7 @@ There is a simple explanation that could make the whole idea trivial. Pollution 
 - Build a watcher that predicts when the forecaster will have an unusually large error, using only past information.
 - Compare routing on the watcher against two simple rival rules (high predicted pollution, high recent error) and a random control.
 - Decide whether any difference is real using block-bootstrap confidence intervals, with the success criterion fixed before running the comparison.
+- Check whether the result holds on a held-out year and at other stations.
 
 ## Data
 
@@ -38,7 +39,7 @@ There is a simple explanation that could make the whole idea trivial. Pollution 
 
 The data covers 2018 to 2025. 2025 is held out as a final test set (see Evaluation).
 
-**Station selection.** I chose stations with a script rather than by hand. It kept London AURN sites with at least 80% hourly coverage for PM2.5 and NO₂ between 2018 and 2025. Four stations passed: MY1 (Marylebone Road, kerbside), KC1, BEX and HRL. CA1 was rejected at 63.8% PM2.5 coverage. The results below are for MY1 only.
+**Station selection.** I chose stations with a script rather than by hand. It kept London AURN sites with at least 80% hourly coverage for PM2.5 and NO₂ between 2018 and 2025. Four stations passed: MY1 (Marylebone Road, kerbside), KC1, BEX and HRL. CA1 was rejected at 63.8% PM2.5 coverage. The main results are for MY1. I then ran the same pipeline, unchanged, at the other three stations (see Results).
 
 **Data-quality issues I had to deal with:**
 
@@ -115,7 +116,7 @@ Any feature that depends on the training window, such as the distribution distan
 
 **Walk-forward validation.** This is a time-series problem, so randomly splitting hours into train and test sets would let the model learn from the future. Instead, I trained on all data before each test quarter, tested on that quarter, then moved forward and refitted. That gives 20 quarterly test folds from 2020 Q1 to 2024 Q4. Rows whose six-hour target falls in the next fold are removed at each boundary.
 
-**Held-out year.** 2025 was kept aside and not used at any point during development, so that choices tuned on the walk-forward folds can be checked on data I have not looked at. Holdout result: [TODO]
+**Held-out year.** 2025 was kept aside and not used at any point during development, so that choices tuned on the walk-forward folds could be checked on data I had not looked at. I ran it once, at MY1, after the main results were final, by extending the same pipeline to four more quarterly folds. Before any 2025 number was read, I checked that the first 20 folds reproduced the committed results exactly at every stage. The holdout agreed with the main result (see Results).
 
 **Leakage test.** Leaked results and honest results both produce reasonable-looking numbers with no error, so inspecting the output would not catch a leak. I used a "canary" test instead: set one input value at time t\* to an extreme value, rerun the pipeline, and check that no prediction made before t\* changed. It passed on a synthetic test case in both directions (fires on a planted leak, silent without one) and on the real pipeline at three positions.
 
@@ -138,11 +139,11 @@ R1 and R2 are the key comparisons. If the watcher cannot beat them, it is only r
 
 - **MAE** of the full routed system, compared with always using F3 and always using persistence. This is the main result because it measures the whole system at 100% coverage.
 - **PR-AUC** for the watcher on its own. Unreliable hours are a minority, so accuracy would be misleading.
-- **Block bootstrap** for every comparison: resample whole weeks rather than single hours, because neighbouring hours are strongly correlated. I used 219 week-long blocks, 2,000 resamples and paired comparisons. A difference only counts if its [TODO: level, e.g. 95%] interval excludes zero.
+- **Block bootstrap** for every comparison: resample whole weeks rather than single hours, because neighbouring hours are strongly correlated. I used week-long blocks (219 at MY1), 2,000 resamples and paired comparisons. A difference only counts if its 95% interval excludes zero.
 
 ## Results
 
-All results are for MY1.
+The main results are for MY1. The holdout and other-station results follow.
 
 **Forecasting** (35,799 out-of-fold hours):
 
@@ -173,38 +174,72 @@ F3 beat persistence by 17% and ridge by 7%, and beat persistence in every fold e
 | Comparison | MAE difference [interval] | Result |
 |---|---|---|
 | R3 vs R2 | −0.031 [−0.073, +0.010] | No detectable difference |
-| R3 vs R1 | −0.047 [−0.091, −0.003] | R3 better, by a small margin |
+| R3 vs R1 | −0.047 [−0.091, −0.003] | R3 better by a small margin; not repeated on the 2025 holdout |
 | R3 vs R0 | +0.090 [+0.047, +0.134] | R3 worse than random |
 
-**Exploratory analyses:**
+### 2025 holdout (MY1, run once)
 
-- *Routing share.* Repeating the comparison for every share from 5% to 95% routed, no share beat always using F3 for any rule.
-- *Risk–coverage.* The area under the risk–coverage curve (AURC, lower is better) was R1 2.703, R2 2.914, R3 3.270, R0 3.480. This measure favours R1 for the reason described under "Defining unreliable": removing high-pollution hours lowers raw error whether or not those hours were unreliable. So R1's score here says little about detecting unreliability.
-- *Relative-error labels.* I repeated the analysis with "unreliable" defined as a large error relative to the prediction, |y − ŷ| / max(ŷ, floor), with the floor at the 10th percentile of predicted PM2.5. The labels matched the main labels on 90.6% of hours. Watcher PR-AUC was 0.198 against 0.183, and R3's routed MAE was 3.718, still worse than always F3 and random. Under these labels R3 did beat R2 (−0.085 [−0.158, −0.023]). I do not treat this as a finding, because the main comparison shows no difference and this check is exploratory.
+8,058 hours, 53 week-long blocks.
+
+| Comparison | Walk-forward 2020–2024 | Holdout 2025 |
+|---|---|---|
+| R3 vs always F3 | +0.257 [+0.209, +0.310] | +0.283 [+0.153, +0.409] |
+| R3 vs R2 | −0.031 [−0.073, +0.010] | +0.026 [−0.042, +0.097] |
+| R3 vs R1 | −0.047 [−0.091, −0.003] | −0.004 [−0.074, +0.065] |
+| R3 vs R0 | +0.090 [+0.047, +0.134] | +0.076 [−0.032, +0.188] |
+| Watcher PR-AUC vs baseline | 0.207 vs 0.186 (1.12×) | 0.225 vs 0.207 (1.08×) |
+
+The holdout agreed with the main result. Every routing rule was again detectably worse than always using F3, and the watcher was again not detectably better than R2. The small R3-over-R1 advantage from the walk-forward folds did not appear in 2025, so I do not treat it as a finding. With 53 weeks rather than 219, the intervals are wider, so the R3 vs R0 difference no longer excludes zero even though the estimate barely changed.
+
+### Other stations
+
+I ran the identical pipeline at KC1, BEX and HRL, with each station's models trained on its own data and no settings changed. These are walk-forward results; 2025 was not used.
+
+| Station | Always F3 MAE | R3 vs always F3 | R3 vs R2 | R3 vs R1 | R3 vs R0 | Watcher lift |
+|---|---|---|---|---|---|---|
+| MY1 | 3.514 | +0.257 [+0.209, +0.310] | −0.031 [−0.073, +0.010] | −0.047 [−0.091, −0.003] | +0.090 [+0.047, +0.134] | 1.12× |
+| KC1 | 2.669 | +0.192 [+0.146, +0.244] | −0.053 [−0.088, −0.018] | −0.050 [−0.085, −0.016] | +0.081 [+0.043, +0.122] | 1.14× |
+| BEX | 3.084 | +0.199 [+0.156, +0.249] | −0.102 [−0.161, −0.050] | −0.112 [−0.165, −0.062] | +0.080 [+0.040, +0.123] | 1.16× |
+| HRL | 2.515 | +0.162 [+0.124, +0.207] | −0.061 [−0.095, −0.028] | −0.053 [−0.084, −0.024] | +0.063 [+0.031, +0.098] | 1.12× |
+
+F3 beat persistence by about 16% at each of the three new stations.
+
+At every station, every routing rule was detectably worse than always using F3. At KC1, BEX and HRL the watcher was detectably better than R1 and R2, but at every station it was also detectably worse than random routing. The ranking was the same at all three new stations: always F3, then random, then the watcher, then R1 and R2.
+
+So "the watcher beat R2" here means it did less harm than R2, not that it helped. I had not decided in advance how to interpret a split like this (a difference at three stations but not the fourth), so I treat it cautiously. The stations also share almost the same city-wide weather inputs, so they are not three independent confirmations.
+
+### Exploratory analyses
+
+- *Why the watcher does less harm.* At KC1, BEX and HRL, the share of routed hours where persistence actually beat F3 was about the same for every rule (40–42%). What differed was the size of the loss in the other hours: smaller for the watcher than for R1 and R2, and smallest for random routing. This suggests the watcher's advantage comes from avoiding the most extreme hours rather than from finding hours where the fallback wins.
+- *Routing share (MY1).* Repeating the comparison for every share from 5% to 95% routed, no share beat always using F3 for any rule.
+- *Risk–coverage (MY1).* The area under the risk–coverage curve (AURC, lower is better) was R1 2.703, R2 2.914, R3 3.270, R0 3.480. This measure favours R1 for the reason described under "Defining unreliable": removing high-pollution hours lowers raw error whether or not those hours were unreliable. So R1's score here says little about detecting unreliability.
+- *Relative-error labels (MY1).* I repeated the analysis with "unreliable" defined as a large error relative to the prediction, |y − ŷ| / max(ŷ, floor), with the floor at the 10th percentile of predicted PM2.5. The labels matched the main labels on 90.6% of hours. Watcher PR-AUC was 0.198 against 0.183, and R3's routed MAE was 3.718, still worse than always F3 and random. Under these labels R3 did beat R2 (−0.085 [−0.158, −0.023]). I do not treat this as a finding, because the main comparison shows no difference and this check is exploratory.
 
 ## Key Findings
 
-- LightGBM beat all three baselines, so the forecaster was a reasonable model to judge.
-- The watcher picked out F3's bad hours slightly better than chance.
-- Routing those hours to persistence made the system worse, and so did every other rule. Random routing was the least harmful.
-- The watcher was not detectably better than switching after a bad recent forecast. At this station, the extra features added nothing detectable beyond "errors come in runs."
-- The failure has a clear cause. The hours the watcher flags are volatile, and persistence, which assumes nothing changes, is even worse than F3 in exactly those hours. Better routing is possible in principle: switching with perfect knowledge of which model would win reaches an MAE of 2.866 with 40% of hours routed. The watcher could spot trouble, but persistence was not a better place to send it.
+- LightGBM beat all three baselines at every station, so the forecaster was a reasonable model to judge.
+- The watcher picked out F3's bad hours slightly better than chance at every station (lift 1.12–1.16×).
+- Routing those hours to persistence made the system worse at all four stations and on the 2025 holdout. So did every other rule. Random routing was the least harmful everywhere.
+- At MY1 the watcher was not detectably better than switching after a bad recent forecast, in either the walk-forward folds or the holdout. At the other three stations it was detectably better than the simple rules, but still worse than random, so it did less harm rather than any good.
+- The failure has a clear cause. The hours any rule flags tend to be volatile, and persistence, which assumes nothing changes, is even worse than F3 in exactly those hours. Better routing is possible in principle: at MY1, switching with perfect knowledge of which model would win reaches an MAE of 2.866 with 40% of hours routed. The watcher could spot trouble, but persistence was not a better place to send it.
 
 ## Limitations
 
-- **One station.** All routing results are for MY1, which is also the only kerbside site that passed the coverage check. The results may differ at background or suburban sites.
+- **Four stations in one city.** The stations share almost the same weather inputs, so they are not independent tests. MY1 is the only kerbside site, so I cannot separate a station effect from a site-type effect.
+- **Holdout at one station.** The 2025 holdout was run at MY1 only.
 - **One fallback and one routing share.** The negative result is for switching to persistence at 20%. It does not show that this kind of watcher could never be useful.
 - **Backtest only.** With a publication lag of about 15 hours, a live system would have less recent-error information than this backtest assumed, so the R2 and R3 rules would likely perform worse in practice.
-- **Feature importance.** Among the watcher's features, the distribution-distance group was used most. LightGBM's split-count importance favours features with many distinct values, and I have not yet run an ablation, so I do not draw conclusions about which feature group matters.
+- **Feature importance.** Among the watcher's features, the distribution-distance group was used most at every station. LightGBM's split-count importance favours features with many distinct values, and I have not run an ablation, so I do not draw conclusions about which feature group matters.
 - **Implementation shortcuts.** The target column ended up in the feature table. It is excluded explicitly, with assertions in `src/forecast.py`, rather than by rebuilding the features. Distribution distances are updated daily rather than hourly.
 - **No causal claims.** The results show what predicts F3's errors, not what causes them.
 - **No new method.** Selective prediction and model routing are established ideas. What this project adds is a careful comparison on real data, with baselines, leakage checks and confidence intervals.
 
 ## Future Work
 
-- **Train the watcher on the question routing actually asks.** The watcher predicts "will F3 be bad?", but switching only helps when "will persistence be better than F3?" These turned out to be different questions.
+- **Train the watcher on the question routing actually asks.** The watcher predicts "will F3 be bad?", but switching only helps when "will persistence be better than F3?" The results across all four stations suggest these are different questions.
 - **Try ridge (F2) as the fallback.** It beat persistence in every fold and may cope better with volatile hours.
-- **Run the other three stations**, including leave-one-station-out tests of whether a watcher trained elsewhere transfers to a new site.
+- **Leave-one-station-out tests** of whether a watcher trained at some stations transfers to a new one.
+- **Stations outside London**, with genuinely different weather, to get more independent replications.
 - **Ablation study:** remove each watcher feature group in turn and measure the effect.
 - **Measure the "optimism gap":** how much better the forecasts look if observed future weather is allowed, which is not possible in real use.
 - **Live scoreboard:** log the watcher's calls in real time and score them afterwards. The AURN lag means this would have to be a retrospective scoreboard rather than live routing.
@@ -252,12 +287,14 @@ when-should-you-trust-the-forecast/
 ## Technologies
 
 - Python 3.12, conda
-- pandas, LightGBM, matplotlib
+- pandas, LightGBM, scikit-learn, matplotlib
 - `rdata` for reading DEFRA's `.RData` files
 - Parquet for storage
 - [TODO: add remaining packages from environment.yml]
 
 ## Reproducing the Project
+
+Main station (MY1):
 
 ```
 conda activate aq
@@ -272,7 +309,25 @@ python -m src.bootstrap
 python -m src.plot_headline
 ```
 
-[TODO: add environment setup, confirm the order and arguments of each command, and include the `--relative` runs for the robustness check]
+Other stations: the four pipeline scripts take `--station`:
+
+```
+python -m src.run_forecast --station KC1
+python -m src.watcher --station KC1
+python -m src.routing --station KC1
+python -m src.bootstrap --station KC1
+```
+
+2025 holdout (MY1 only; the design is that this is run once):
+
+```
+python -m src.run_forecast --holdout
+python -m src.watcher --holdout
+python -m src.routing --holdout
+python -m src.bootstrap --holdout
+```
+
+[TODO: add environment setup, confirm the order and arguments of the ingest and feature commands, and include the `--relative` runs for the robustness check]
 
 ## Author
 
