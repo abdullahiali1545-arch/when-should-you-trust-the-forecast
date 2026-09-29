@@ -1,0 +1,2 @@
+station,rule,feature,quantile,threshold,fitted_on
+MY1,R2,resid_mae_24h,0.8,4.5714892227673944,OOF folds 1-20 (2018-2024)
