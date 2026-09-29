@@ -1018,3 +1018,20 @@ No change to code, settings or analysis after reading. Any later change is recor
 **Reporting.** All three stations are reported whatever they show, with the same win condition applied per station. No station is dropped after results are seen. If a station's pipeline fails for a data reason, the failure is reported rather than engineered around. Results are not pooled across stations.
 
 **Interpretation fixed in advance.** If R3 vs R2 includes zero at every station, the null replicates. If R3 beats R2 at a single station, that is reported as station-specific: MY1 is the only kerbside site, so station and site type cannot be separated. With four stations and eight comparisons each, some intervals may exclude zero by chance, so a win at one station is not treated as a general finding.
+
+### 2026-09-25 — W4a results (KC1, BEX, HRL results seen)
+
+Run under the W4a pre-registration (`d44faa0`, 11:14). The `--station` code was committed after the KC1 run; the change selects file paths only and touches no modelling.
+
+| Station | R3 vs always-ML | R3 vs R2 | R3 vs R1 | R3 vs R0 | Watcher lift |
+|---|---|---|---|---|---|
+| MY1 (walk-forward) | +0.257 [+0.209, +0.310] | −0.031 [−0.073, +0.010] | −0.047 [−0.091, −0.003] | +0.090 [+0.047, +0.134] | 1.12x |
+| KC1 | +0.192 [+0.146, +0.244] | −0.053 [−0.088, −0.018] | −0.050 [−0.085, −0.016] | +0.081 [+0.043, +0.122] | 1.14x |
+| BEX | +0.199 [+0.156, +0.249] | −0.102 [−0.161, −0.050] | −0.112 [−0.165, −0.062] | +0.080 [+0.040, +0.123] | 1.16x |
+| HRL | +0.162 [+0.124, +0.207] | −0.061 [−0.095, −0.028] | −0.053 [−0.084, −0.024] | +0.063 [+0.031, +0.098] | 1.12x |
+
+Every rule was detectably worse than always-ML at every station: the H3 null replicates at all four. R3 vs R2 was detectably negative (R3 better) at KC1, BEX and HRL, and not at MY1, in either the walk-forward or the 2025 holdout. R3 was detectably worse than random routing (R0) at every station.
+
+**Case not covered in advance.** The pre-registration defined the outcome for no station and for a single station, but not for three of four. The interpretation of this case is made after seeing results. The stations share near-identical city-wide weather inputs, so they are not independent replications.
+
+**Exploratory (not pre-registered).** At KC1, BEX and HRL the share of routed hours where persistence beat F3 was similar across rules (about 40–42%), while the mean loss per routed hour was smaller for R3 than for R1 and R2. This suggests R3's advantage comes from routing less extreme hours rather than from finding hours where the fallback wins.
