@@ -310,3 +310,17 @@ the W1 station audit. Fold 4 is retained and reported with n_test alongside.
    Relative labels: R3-R2 -0.085 [-0.158, -0.023] detectable, but robustness
    check only, label form chosen after primary results. Report both.
    CORE COMPLETE. Next: README, then ship.
+
+2026-09-29 — W4b steps 1–5c
+DID: Warning check (raw + level-adjusted): R2 selected by pre-registered rule; R3 vs R2 no detectable difference at all 4 stations.
+     Frozen R2 thresholds + evening-origin check (warning holds, ~17% flag rate, seasonal: peaks Jan–Mar).
+     Freshness: AURN chosen (~12h, HRL ~15h); LAQN and SOS dropped. Spec: W4b design entry + R2 shadow-input amendment, both before launch.
+     Froze F3 x4 to 2025-12-31, recipe verified EXACT on fold 20. Built src/live.py; hourly GitHub Actions → live-log branch (data/live_test). Repo made public.
+     Linux vs Windows forecasts bit-identical on 18/18 matched.
+UNDERSTAND: raw error rewards high-pollution flags (Part 8); delay shifts the picture rather than degrading it; why shadow forecasts are legitimate.
+STRUGGLED: getting files into the right folders; Windows prompt quirks.
+UNRESOLVED: HRL SSL timeout on first GitHub run — confirm self-recovery; no scheduled run observed yet;
+            live-log ruleset not confirmed; freshness log to commit after 2–3 days.
+NEXT (first step): git fetch origin live-log && git log origin/live-log --oneline -5
+            → confirm "live run" commits from the schedule, rerun the comparison (want 24 0.0 0.0 0),
+            then python -m src.live --live-dir data/live_test and check new_scores: 6. Then launch (5d).
