@@ -1035,3 +1035,11 @@ Every rule was detectably worse than always-ML at every station: the H3 null rep
 **Case not covered in advance.** The pre-registration defined the outcome for no station and for a single station, but not for three of four. The interpretation of this case is made after seeing results. The stations share near-identical city-wide weather inputs, so they are not independent replications.
 
 **Exploratory (not pre-registered).** At KC1, BEX and HRL the share of routed hours where persistence beat F3 was similar across rules (about 40–42%), while the mean loss per routed hour was smaller for R3 than for R1 and R2. This suggests R3's advantage comes from routing less extreme hours rather than from finding hours where the fallback wins.
+
+2026-09-29 — W4b: warning check and flag-selection rule (results seen)
+
+W4b's live map will show a warning rather than route, because every routing rule was worse than always-ML at all four stations. Raw-error check (src/check_warning.py, walk-forward folds 3–20, 2025 not read): random flags give a ratio of about 1 at every station (sanity passed). R3-flagged hours carry 1.32–1.53× F3's unflagged error, CI excluding 1, but R1 (2.01–2.71×) and R2 (1.70–2.16×) are detectably higher at every station.
+
+Raw absolute error favours R1 by construction (Part 8), and the watcher was trained on level-stratified labels. Next check, fixed before running: level-adjusted ratio, where each hour's F3 absolute error is divided by the mean F3 absolute error of its predicted-concentration decile within the same fold. Same paired week-block bootstrap. Both raw and level-adjusted results will be reported.
+
+Decision rule, fixed before running: if R3's level-adjusted ratio detectably exceeds both R1's and R2's at ≥3 of 4 stations, the map colours by R3 ("unusually uncertain for this pollution level"). Otherwise it colours by R2 ("recent forecasts have been poor"), and R3's flag is logged and shown only in the scoreboard. R1 is excluded as a map flag because it duplicates the forecast value shown.
