@@ -1065,3 +1065,9 @@ Claims. Descriptive only until at least 26 weeks of scored forecasts including o
 Integrity. Written by scheduled GitHub Actions runs to an append-only live-log branch with force-pushes blocked. The claim is "logged before the outcome was published", evidenced by GitHub's run records, not "impossible to fake".
 
 Launch date: [fill in on the day of the first live run].
+
+2026-09-29 — W4b amendment: R2's live inputs and truth recording (clarification before launch; no live forecasts exist)
+
+R2 inputs. The design entry says R2 is grey when fewer than 12 scored forecasts fall in the window. Live, only origins with unpublished targets are logged, about six per station per day, so that window could never reach 12 and R2 would be permanently grey. R2 is therefore computed as in the backtest: from F3 forecasts at every hourly origin ("shadow forecasts"), recomputed each run by the frozen model from published data only. Because the model is frozen, a shadow forecast equals what an hourly service would have issued at that origin. Shadow forecasts are R2 inputs only: never logged as forecasts, never scored. They replace the ~30h warm-up forecasts in the design entry, which served the same purpose. Grey when fewer than 12 shadow forecasts with published outcomes fall in the window.
+
+Truth. Each forecast is scored against the value first published by AURN, which is provisional. Later ratification changes are not applied to the log.
