@@ -40,6 +40,12 @@ import argparse
 import json
 from pathlib import Path
 
+import warnings
+
+# rdata cannot map R's POSIXct class and says so once per file read. Harmless:
+# ingest converts the raw epoch seconds itself. Silenced so real errors stand out.
+warnings.filterwarnings("ignore", message="Missing constructor for R class")
+
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
