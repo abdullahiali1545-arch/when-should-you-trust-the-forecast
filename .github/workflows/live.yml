@@ -27,22 +27,22 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04        # pinned: ubuntu-latest moves to 26 on 2026-10-19
     timeout-minutes: 20
     steps:
       - name: Check out code (main)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
 
       - name: Check out the log branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: live-log
           path: live-log
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -59,7 +59,9 @@ jobs:
         run: |
           git config user.name "live-log-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "${LIVE_DIR}"
+          # -f: the branch inherits main's .gitignore, which ignores data/.
+          # Forcing is deliberate here and only here; on laptops data/ stays ignored.
+          git add -f "${LIVE_DIR}"
           if git diff --cached --quiet; then
             echo "nothing new to commit"
             exit 0
