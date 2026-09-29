@@ -1045,3 +1045,23 @@ Raw absolute error favours R1 by construction (Part 8), and the watcher was trai
 Decision rule, fixed before running: if R3's level-adjusted ratio detectably exceeds both R1's and R2's at ≥3 of 4 stations, the map colours by R3 ("unusually uncertain for this pollution level"). Otherwise it colours by R2 ("recent forecasts have been poor"), and R3's flag is logged and shown only in the scoreboard. R1 is excluded as a map flag because it duplicates the forecast value shown.
 
 Outcome (same day): Level-adjusted check run after the rule above was committed. R1's ratio was 1.00 at all four stations; R2 1.11–1.17; R3 1.07–1.12. R3 detectably beat R0 and R1 at all four stations, but R3 vs R2 was no detectable difference at all four. Under the pre-registered rule, the map colours by R2 and R3's flag is logged for the scoreboard only.
+
+2026-09-29 — W4b live prospective log: design, fixed before launch (results seen)
+
+Why this replaces Part 12 as written. Part 12 was conditional on the freshness check. AURN publishes in daily batches, about 12h behind (about 15h at HRL; measured 2026-09-29, W1.4 found 15h). LAQN had no recent PM2.5 at three of four stations. DEFRA's SOS API timed out from two networks. So there is no real-time source, and W4b is a prospective log, "as fresh as the data allows", not a real-time forecast. Delivered as a static page read from a logged file, not Streamlit.
+
+Frozen models. One F3 per station, same features and settings as W2, trained once on all data to 2025-12-31. This uses 2025 at KC1, BEX and HRL, retiring the W4a 2025 seal there; the MY1 holdout was already read. No retraining, threshold change or feature change while the log runs. Any change starts a new model version with its own spec entry, and the scoreboard reports versions separately.
+
+Warning rule. R2, as selected by the 2026-09-29 rule: flag when resid_mae_24h (definition imported from src/watcher_features.py) is at or above the station's threshold, the 80th percentile over OOF folds 1–20. Thresholds: MY1 4.571, KC1 3.635, BEX 4.277, HRL 3.430 µg/m³. Grey ("no recent data") when fewer than 12 scored forecasts fall in the 24h window, matching MIN_RECENT_OBS. R3's flag is not in v1; it will be added in v2 and scored separately from its own start date.
+
+Which forecasts count. At each run, forecasts are made only from origins whose target has not yet been published. Each origin is forecast once and stored; it is never recomputed, because archive weather can be revised. Weather inputs only use hours at or before the origin. About 30h of warm-up forecasts before launch seed R2; they are marked warmup and never scored.
+
+What is logged. Per forecast: station, origin, run time (UTC), target time, F3 and persistence forecasts, resid_mae_24h, threshold, flag, data delay, model version. Truth and errors are added when published.
+
+What is scored. (1) F3 MAE vs persistence MAE. (2) F3's error ratio, flagged vs unflagged hours, raw and level-adjusted. Backtest expectation from src/live_threshold.py, evening origins: level-adjusted 1.12–1.16, raw 1.94–2.41. The realised flag rate is reported, not corrected; it is expected below 20%, and lowest in autumn.
+
+Claims. Descriptive only until at least 26 weeks of scored forecasts including one full January–March. After that: pooled across the four stations, paired week-block bootstrap as in W3 (2,000 resamples, seed 42). A difference counts only if its 95% interval excludes zero.
+
+Integrity. Written by scheduled GitHub Actions runs to an append-only live-log branch with force-pushes blocked. The claim is "logged before the outcome was published", evidenced by GitHub's run records, not "impossible to fake".
+
+Launch date: [fill in on the day of the first live run].
