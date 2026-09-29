@@ -1,0 +1,9 @@
+# Exact versions from the aq environment on 2026-09-29. The live logger must
+# run the frozen models with the SAME packages they were built with:
+# src/live.py refuses to run if LightGBM differs from models/manifest_*.json.
+lightgbm==4.7.0
+pandas==3.0.5
+numpy==2.5.2
+scikit-learn==1.9.0
+scipy==1.18.0
+rdata==1.1.0

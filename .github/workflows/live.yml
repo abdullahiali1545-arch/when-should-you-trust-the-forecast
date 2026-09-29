@@ -1,0 +1,68 @@
+# W4b step 5c: run the live prospective logger on a schedule.
+#
+# Code runs from main. Output is written to, and committed on, the live-log
+# branch, which has force-pushes and deletion blocked by a ruleset. Each
+# commit message records the main commit whose code produced it.
+#
+# BEFORE LAUNCH: LIVE_DIR is data/live_test, so test runs never touch the
+# real log. LAUNCH = change LIVE_DIR to data/live in one commit, and record
+# the launch date in PROJECT_SPEC.md.
+
+name: live-log
+
+on:
+  schedule:
+    - cron: "17 * * * *"      # hourly at :17 UTC. GitHub may start it late under load
+  workflow_dispatch:           # "Run workflow" button, for testing
+
+permissions:
+  contents: write              # needed to push to live-log
+
+concurrency:                   # never two runs writing the log at once
+  group: live-log
+  cancel-in-progress: false
+
+env:
+  LIVE_DIR: data/live_test     # LAUNCH: change to data/live
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out code (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Check out the log branch
+        uses: actions/checkout@v4
+        with:
+          ref: live-log
+          path: live-log
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-live.txt
+
+      - name: Install pinned packages
+        run: pip install -r requirements-live.txt
+
+      - name: Run the logger
+        run: python -m src.live --live-dir "live-log/${LIVE_DIR}"
+
+      - name: Commit and push the log
+        working-directory: live-log
+        run: |
+          git config user.name "live-log-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${LIVE_DIR}"
+          if git diff --cached --quiet; then
+            echo "nothing new to commit"
+            exit 0
+          fi
+          git commit -m "live run $(date -u +%Y-%m-%dT%H:%MZ) (code ${GITHUB_SHA::7})"
+          git push origin live-log
