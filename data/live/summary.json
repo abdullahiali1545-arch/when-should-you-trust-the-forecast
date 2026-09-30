@@ -1,0 +1,75 @@
+{
+  "generated_utc": "2026-09-30T06:59:18Z",
+  "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
+  "stations": {
+    "MY1": {
+      "run_status": {
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 8.0,
+        "shadow_forecasts": 205,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 0
+      },
+      "latest": {
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 9.712126846809122,
+        "flag": "warn",
+        "data_delay_h": 8.0
+      }
+    },
+    "KC1": {
+      "run_status": {
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 8.0,
+        "shadow_forecasts": 185,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 0
+      },
+      "latest": {
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 7.352452617246317,
+        "flag": "warn",
+        "data_delay_h": 8.0
+      }
+    },
+    "BEX": {
+      "run_status": {
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 8.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 0
+      },
+      "latest": {
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 6.0572695933071925,
+        "flag": "warn",
+        "data_delay_h": 8.0
+      }
+    },
+    "HRL": {
+      "run_status": {
+        "latest_obs_utc": "2026-09-29T20:00:00Z",
+        "data_delay_h": 11.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 0
+      },
+      "latest": {
+        "origin_utc": "2026-09-29T20:00:00Z",
+        "target_utc": "2026-09-30T02:00:00Z",
+        "yhat_F3": 8.90963477851372,
+        "flag": "ok",
+        "data_delay_h": 11.0
+      }
+    }
+  },
+  "first_forecast_utc": "2026-09-30T06:59:18Z"
+}
