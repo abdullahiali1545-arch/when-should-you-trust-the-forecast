@@ -1,73 +1,113 @@
 {
-  "generated_utc": "2026-09-30T00:33:34Z",
+  "generated_utc": "2026-09-30T06:50:13Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-09-28T23:00:00Z",
-        "data_delay_h": 25.6,
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 7.8,
         "shadow_forecasts": 205,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-09-28T23:00:00Z",
-        "target_utc": "2026-09-29T05:00:00Z",
-        "yhat_F3": 5.461958430593047,
-        "flag": "ok",
-        "data_delay_h": 16.9
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 9.712126846809122,
+        "flag": "warn",
+        "data_delay_h": 7.8
+      },
+      "scoreboard": {
+        "n_scored": 6,
+        "mae_F3": 7.191,
+        "mae_persistence": 7.167,
+        "n_warn": 0,
+        "n_ok": 6,
+        "n_grey": 0,
+        "mae_F3_warn": null,
+        "mae_F3_ok": 7.191
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-09-28T23:00:00Z",
-        "data_delay_h": 25.6,
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 7.8,
         "shadow_forecasts": 185,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-09-28T23:00:00Z",
-        "target_utc": "2026-09-29T05:00:00Z",
-        "yhat_F3": 4.745414554983858,
-        "flag": "ok",
-        "data_delay_h": 16.9
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 7.352452617246317,
+        "flag": "warn",
+        "data_delay_h": 7.8
+      },
+      "scoreboard": {
+        "n_scored": 6,
+        "mae_F3": 3.516,
+        "mae_persistence": 4.198,
+        "n_warn": 0,
+        "n_ok": 6,
+        "n_grey": 0,
+        "mae_F3_warn": null,
+        "mae_F3_ok": 3.516
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-09-28T23:00:00Z",
-        "data_delay_h": 25.6,
+        "latest_obs_utc": "2026-09-29T23:00:00Z",
+        "data_delay_h": 7.8,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-09-28T23:00:00Z",
-        "target_utc": "2026-09-29T05:00:00Z",
-        "yhat_F3": 4.679585883675607,
-        "flag": "ok",
-        "data_delay_h": 16.9
+        "origin_utc": "2026-09-29T23:00:00Z",
+        "target_utc": "2026-09-30T05:00:00Z",
+        "yhat_F3": 6.0572695933071925,
+        "flag": "warn",
+        "data_delay_h": 7.8
+      },
+      "scoreboard": {
+        "n_scored": 6,
+        "mae_F3": 4.256,
+        "mae_persistence": 4.717,
+        "n_warn": 0,
+        "n_ok": 6,
+        "n_grey": 0,
+        "mae_F3_warn": null,
+        "mae_F3_ok": 4.256
       }
     },
     "HRL": {
       "run_status": {
-        "latest_obs_utc": "2026-09-28T20:00:00Z",
-        "data_delay_h": 28.6,
+        "latest_obs_utc": "2026-09-29T20:00:00Z",
+        "data_delay_h": 10.8,
         "shadow_forecasts": 217,
         "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-09-28T20:00:00Z",
-        "target_utc": "2026-09-29T02:00:00Z",
-        "yhat_F3": 4.781922179401731,
+        "origin_utc": "2026-09-29T20:00:00Z",
+        "target_utc": "2026-09-30T02:00:00Z",
+        "yhat_F3": 8.90963477851372,
         "flag": "ok",
-        "data_delay_h": 28.6
+        "data_delay_h": 10.8
+      },
+      "scoreboard": {
+        "n_scored": 6,
+        "mae_F3": 1.442,
+        "mae_persistence": 0.98,
+        "n_warn": 0,
+        "n_ok": 6,
+        "n_grey": 0,
+        "mae_F3_warn": null,
+        "mae_F3_ok": 1.442
       }
     }
   },
