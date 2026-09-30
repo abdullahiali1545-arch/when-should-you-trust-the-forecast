@@ -23,7 +23,7 @@ concurrency:                   # never two runs writing the log at once
   cancel-in-progress: false
 
 env:
-  LIVE_DIR: data/live_test     # LAUNCH: change to data/live
+  LIVE_DIR: data/live     # LAUNCH: change to data/live
 
 jobs:
   run:

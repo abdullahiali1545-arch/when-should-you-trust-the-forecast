@@ -1064,7 +1064,7 @@ Claims. Descriptive only until at least 26 weeks of scored forecasts including o
 
 Integrity. Written by scheduled GitHub Actions runs to an append-only live-log branch with force-pushes blocked. The claim is "logged before the outcome was published", evidenced by GitHub's run records, not "impossible to fake".
 
-Launch date: [fill in on the day of the first live run].
+Launch date: 2026-09-30. The first commit writing to data/live on the live-log branch is the first live forecast.
 
 2026-09-29 — W4b amendment: R2's live inputs and truth recording (clarification before launch; no live forecasts exist)
 
