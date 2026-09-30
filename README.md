@@ -49,7 +49,7 @@ The data covers 2018 to 2025. 2025 is held out as a final test set (see Evaluati
 - **Boundary-layer height.** I dropped this variable because the Open-Meteo archive has no values for January to June 2024 at any of the stations.
 - **Publication lag.** New AURN data appeared about 15 hours after measurement when I checked. This matters for any live use (see Limitations).
 
-Data snapshot date: [TODO]
+Data snapshot dates: MY1 pulled 2026-08-29; KC1, BEX and HRL pulled 2026-09-04 (recorded in `docs/ingest_checks.md` and `docs/session_log.md`). None has been re-pulled since, so every backtest result uses these snapshots.
 
 ## Methodology
 
@@ -215,6 +215,33 @@ So "the watcher beat R2" here means it did less harm than R2, not that it helped
 - *Risk–coverage (MY1).* The area under the risk–coverage curve (AURC, lower is better) was R1 2.703, R2 2.914, R3 3.270, R0 3.480. This measure favours R1 for the reason described under "Defining unreliable": removing high-pollution hours lowers raw error whether or not those hours were unreliable. So R1's score here says little about detecting unreliability.
 - *Relative-error labels (MY1).* I repeated the analysis with "unreliable" defined as a large error relative to the prediction, |y − ŷ| / max(ŷ, floor), with the floor at the 10th percentile of predicted PM2.5. The labels matched the main labels on 90.6% of hours. Watcher PR-AUC was 0.198 against 0.183, and R3's routed MAE was 3.718, still worse than always F3 and random. Under these labels R3 did beat R2 (−0.085 [−0.158, −0.023]). I do not treat this as a finding, because the main comparison shows no difference and this check is exploratory.
 
+## Live prospective log
+
+A backtest can be re-run until it looks good. A log written before the answers exist cannot. So the last part of the project runs the forecaster live and records each forecast before DEFRA publishes the reading it predicts. The design, thresholds and claim rules were all committed to `PROJECT_SPEC.md` before the first live forecast (changelog entries dated 2026-09-29).
+
+**[Live map](https://abdullahiali1545-arch.github.io/when-should-you-trust-the-forecast/)** · [raw log](https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/tree/live-log/data/live)
+
+**A warning, not switching.** Every switching rule lost to always using F3, so the live system always publishes F3 and shows a warning when recent forecasts have been poor. A warning only needs F3 to be worse than usual in flagged hours. It does not need persistence to be better.
+
+**Which warning.** I compared F3's error in flagged hours with its error in unflagged hours, for each rule, with week-block bootstrap intervals. On raw error, the simple rules looked best (R1 2.01–2.71× worse in flagged hours, R2 1.70–2.16×, R3 1.32–1.53×). Raw error rewards any rule that picks high-pollution hours, for the reason under "Defining unreliable", so the rule for choosing was fixed before running a level-adjusted comparison, where each hour's error is divided by the average error for its predicted-concentration decile:
+
+| Station | R1: pollution high | R2: recent error high | R3: watcher | R3 vs R2 |
+|---|---|---|---|---|
+| MY1 | 1.00 | 1.11 | 1.07 | no detectable difference |
+| KC1 | 1.00 | 1.15 | 1.09 | no detectable difference |
+| BEX | 1.00 | 1.15 | 1.11 | no detectable difference |
+| HRL | 1.00 | 1.17 | 1.12 | no detectable difference |
+
+R1 carries nothing beyond the pollution level itself. The watcher beat R1 and random at every station but was not detectably different from R2, so under the pre-registered rule the map uses R2: flag a site when F3's average error over the previous day is at or above a fixed threshold (the 80th percentile in the walk-forward folds: MY1 4.57, KC1 3.64, BEX 4.28, HRL 3.43 µg/m³). With a threshold fixed in advance, as a live system requires, the warning still held (level-adjusted 1.11–1.17) and flagged about 17% of hours, far more in January to March than in autumn.
+
+**The model is frozen, and verifiably the same model.** One F3 per station, trained once on data to the end of 2025. Before freezing, the training recipe was checked by refitting fold 20 and reproducing the committed out-of-fold forecasts exactly. The live forecasts are also identical on Windows and Linux: 24 of 24 matched to every decimal place in the first comparison.
+
+**What the publication delay means.** AURN publishes in a daily batch, about 8–15 hours behind. The logger forecasts only from origins whose target reading has not been published yet, which gives about six forecasts per station per day, all from the last hours of the batch (evening origins). At those origins the model knows exactly what the backtest knew, so the delay limits which hours can be forecast rather than how much the warning knows. The warning's inputs are F3 forecasts at every recent hour, recomputed by the frozen model from published data; they are never scored.
+
+**Integrity.** A scheduled GitHub Actions job writes forecasts and scores to separate append-only files on a `live-log` branch that blocks force-pushes and deletion. Each commit records the code version that produced it. GitHub's scheduler is best-effort, so runs are sometimes hours apart; this loses no forecasts, because each batch's origins stay unpublished until the next batch.
+
+**What I can and cannot claim.** I can say every forecast was logged before its reading was published. I cannot call it real-time while the data are hours late, and I will not make comparative claims until at least 26 weeks of scored forecasts, including a full January to March, exist.
+
 ## Key Findings
 
 - LightGBM beat all three baselines at every station, so the forecaster was a reasonable model to judge.
@@ -228,7 +255,8 @@ So "the watcher beat R2" here means it did less harm than R2, not that it helped
 - **Four stations in one city.** The stations share almost the same weather inputs, so they are not independent tests. MY1 is the only kerbside site, so I cannot separate a station effect from a site-type effect.
 - **Holdout at one station.** The 2025 holdout was run at MY1 only.
 - **One fallback and one routing share.** The negative result is for switching to persistence at 20%. It does not show that this kind of watcher could never be useful.
-- **Backtest only.** With a publication lag of about 15 hours, a live system would have less recent-error information than this backtest assumed, so the R2 and R3 rules would likely perform worse in practice.
+- **Live evidence is still accumulating.** All results above are backtests. The live log started on 30 September 2026 and is descriptive until the pre-registered minimum run. I originally expected the publication lag to leave a live warning with less recent-error information than the backtest. That was wrong: live forecasts are made from the newest published hour, where the model knows exactly what the backtest knew. The lag instead restricts which hours can be forecast live.
+- **Live threshold drift.** The warning threshold was fitted on walk-forward errors, while the live model was trained on more data, so the live flag rate may fall below 20%. It is reported, not corrected.
 - **Feature importance.** Among the watcher's features, the distribution-distance group was used most at every station. LightGBM's split-count importance favours features with many distinct values, and I have not run an ablation, so I do not draw conclusions about which feature group matters.
 - **Implementation shortcuts.** The target column ended up in the feature table. It is excluded explicitly, with assertions in `src/forecast.py`, rather than by rebuilding the features. Distribution distances are updated daily rather than hourly.
 - **No causal claims.** The results show what predicts F3's errors, not what causes them.
@@ -242,28 +270,37 @@ So "the watcher beat R2" here means it did less harm than R2, not that it helped
 - **Stations outside London**, with genuinely different weather, to get more independent replications.
 - **Ablation study:** remove each watcher feature group in turn and measure the effect.
 - **Measure the "optimism gap":** how much better the forecasts look if observed future weather is allowed, which is not possible in real use.
-- **Live scoreboard:** log the watcher's calls in real time and score them afterwards. The AURN lag means this would have to be a retrospective scoreboard rather than live routing.
 
 ## Project Structure
 
 ```
 when-should-you-trust-the-forecast/
 ├── README.md
-├── PROJECT_SPEC.md              # plan, hypotheses and dated changes
+├── PROJECT_SPEC.md              # plan, hypotheses and dated, pre-registered changes
+├── environment.yml              # full conda environment (Windows)
+├── requirements.txt             # pip packages
+├── requirements-live.txt        # pinned packages for the live logger
+├── smoke_test.py                # first check that both data sources return data
+├── .github/workflows/live.yml   # scheduled live logger
 ├── docs/
-│   ├── ingest_checks.md         # timezone and data-freshness checks
+│   ├── ingest_checks.md         # timezone, freshness and ingest checks
 │   ├── information_contract.md  # what each model may use at time t
 │   ├── harness_design.md        # walk-forward design
+│   ├── station_selection.md     # coverage audit, including rejected stations
 │   ├── domain_notes.md          # background on air-quality forecasting
-│   └── session_log.md
+│   ├── session_log.md
+│   └── index.html               # live map (GitHub Pages)
 ├── src/
 │   ├── ingest.py                # AURN + Open-Meteo → Parquet
+│   ├── tz_check.py              # timezone verification
+│   ├── freshness_check.py       # publication lag at MY1
 │   ├── select_stations.py       # coverage-based station selection
 │   ├── features.py              # features that do not depend on the fold
-│   ├── eda.py
+│   ├── eda.py                   # exploratory figures
 │   ├── evaluate.py              # walk-forward harness and canary test
 │   ├── forecast.py              # F0–F3
-│   ├── run_forecast.py
+│   ├── run_w2_5.py              # first baseline scores (F0, F1)
+│   ├── run_forecast.py          # scores F0–F3 through the harness
 │   ├── labels.py                # stratified "unreliable" labels
 │   ├── watcher_features.py
 │   ├── watcher.py
@@ -271,7 +308,13 @@ when-should-you-trust-the-forecast/
 │   ├── risk_coverage.py
 │   ├── robustness_rel.py        # relative-error label check
 │   ├── bootstrap.py
-│   └── plot_headline.py
+│   ├── plot_headline.py
+│   ├── check_warning.py         # live warning choice: R0–R3 flagged vs unflagged error
+│   ├── live_threshold.py        # fixed R2 threshold, evening-origin check
+│   ├── freshness.py             # how late each data source is
+│   ├── freeze.py                # verify the F3 recipe, then freeze to 2025-12-31
+│   └── live.py                  # the live logger
+├── models/                      # frozen F3 per station + manifests
 ├── tests/
 │   ├── test_canary.py
 │   └── test_canary_pipeline.py
@@ -282,7 +325,7 @@ when-should-you-trust-the-forecast/
     └── figures/
 ```
 
-[TODO: check this against the repo and add any files not listed, e.g. environment.yml]
+Data files (`data/`) are not committed; the reproduce commands below rebuild them.
 
 ## Technologies
 
@@ -290,17 +333,26 @@ when-should-you-trust-the-forecast/
 - pandas, LightGBM, scikit-learn, matplotlib
 - `rdata` for reading DEFRA's `.RData` files
 - Parquet for storage
-- [TODO: add remaining packages from environment.yml]
+- GitHub Actions and GitHub Pages for the live log and map, Leaflet for the map
+- NumPy, and SciPy for the distribution-distance (Wasserstein) features
+- pytest for the canary tests
+- Exact versions are pinned in `environment.yml` and `requirements.txt`
 
 ## Reproducing the Project
 
-Main station (MY1):
+Setup, once. `environment.yml` pins the exact versions used; it was built on Windows, so a few Windows-only packages in it will not install elsewhere (the live logger on Linux uses `requirements-live.txt` instead).
 
 ```
+conda env create -f environment.yml
 conda activate aq
-python -m src.ingest
-python -m src.select_stations
-python -m src.features
+```
+
+Main station (MY1), run from the repo root in this order:
+
+```
+python -m src.select_stations                           # optional: re-runs the station coverage audit (reads raw data only)
+python -m src.ingest --site MY1 --start 2018 --end 2025  # AURN + weather -> data/processed/MY1.parquet
+python -m src.features --station MY1                     # -> data/features/MY1.parquet
 python -m src.run_forecast
 python -m src.watcher
 python -m src.routing
@@ -309,9 +361,11 @@ python -m src.bootstrap
 python -m src.plot_headline
 ```
 
-Other stations: the four pipeline scripts take `--station`:
+Other stations: ingest and build features first, then the four pipeline scripts take `--station`:
 
 ```
+python -m src.ingest --site KC1 --start 2018 --end 2025
+python -m src.features --station KC1
 python -m src.run_forecast --station KC1
 python -m src.watcher --station KC1
 python -m src.routing --station KC1
@@ -327,10 +381,25 @@ python -m src.routing --holdout
 python -m src.bootstrap --holdout
 ```
 
-[TODO: add environment setup, confirm the order and arguments of the ingest and feature commands, and include the `--relative` runs for the robustness check]
+Live system (the scheduled job runs `src.live` on GitHub; locally, only ever write to a test folder):
+
+```
+python -m src.freeze --station MY1
+python -m src.live --live-dir data/live_test
+```
+
+Relative-error robustness check (MY1 only; run after the main MY1 pipeline, since it reuses its forecasts):
+
+```
+python -m src.robustness_rel
+python -m src.routing --relative
+python -m src.risk_coverage --relative
+python -m src.bootstrap --relative
+python -m src.plot_headline --relative
+```
 
 ## Author
 
-[TODO: your name]. Final-year BSc Mathematics and Data Science student at City St George's, University of London.
+Abdulahi Ali. Final-year BSc Mathematics and Data Science student at City St George's, University of London.
 
 GitHub: [abdullahiali1545-arch](https://github.com/abdullahiali1545-arch)
