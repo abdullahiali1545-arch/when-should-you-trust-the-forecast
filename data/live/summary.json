@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-10-01T06:07:19Z",
+  "generated_utc": "2026-10-01T13:30:08Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-09-30T23:00:00Z",
-        "data_delay_h": 7.1,
+        "data_delay_h": 14.5,
         "shadow_forecasts": 205,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-09-30T23:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-09-30T23:00:00Z",
-        "data_delay_h": 7.1,
+        "data_delay_h": 14.5,
         "shadow_forecasts": 199,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-09-30T23:00:00Z",
@@ -59,11 +59,11 @@
     "BEX": {
       "run_status": {
         "latest_obs_utc": "2026-09-30T23:00:00Z",
-        "data_delay_h": 7.1,
+        "data_delay_h": 14.5,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-09-30T23:00:00Z",
