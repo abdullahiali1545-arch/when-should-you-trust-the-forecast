@@ -3,155 +3,229 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>When should you trust the forecast? Live log</title>
-<meta name="description" content="Six-hour PM2.5 forecasts for four London monitoring sites, each logged before its outcome is published.">
+<title>London PM2.5 forecasts: live log</title>
+<meta name="description" content="Six-hour PM2.5 forecasts for four London monitoring sites, saved to a public log before the official readings are published, then checked against them.">
+<meta property="og:title" content="London PM2.5 forecasts: live log">
+<meta property="og:description" content="Six-hour air pollution forecasts for four London sites, logged before the readings are published and scored when they arrive.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://abdullahiali1545-arch.github.io/when-should-you-trust-the-forecast/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ffffff'/><path d='M3 22 L10 14 L16 18 L23 8 L29 12' fill='none' stroke='%231d5fa8' stroke-width='3'/><rect x='21' y='19' width='5' height='5' fill='%23b8322a'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
-  --bg:#eef2f1; --panel:#f8faf9; --ink:#16262b; --slate:#56676c; --rule:#d3dbda;
-  --ok:#2e8b6e; --ok-bg:#dcefe8; --warn:#b8720f; --warn-bg:#f6e6cc; --none:#8e9a9d; --none-bg:#e3e8e8;
-  --focus:#1f6f8b;
-  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  color:var(--ink); background:var(--bg);
+  --page:#f5f7f6; --surface:#ffffff; --ink:#1a2a2f; --muted:#4f5f63; --line:#cfd8d6;
+  --forecast:#1d5fa8; --reading:#b8322a; --nochange:#8a9699;
+  --grid-major:#cfe3d7; --grid-minor:#e9f2ec;
+  --high:#9a5a00; --high-bg:#f8e9cf; --normal:#1f7356; --normal-bg:#dcefe5; --stale:#6f7b7e; --stale-bg:#e6eaea;
+  --focus:#1d5fa8;
+  font-family:"Overpass",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px; line-height:1.55; color:var(--ink); background:var(--page);
   font-variant-numeric:tabular-nums;
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#0f191c;--panel:#152226;--ink:#e3ebeb;--slate:#9aaaae;--rule:#27383c;
-        --ok:#4fbf98;--ok-bg:#15372d;--warn:#e0a24a;--warn-bg:#3b2a10;--none:#8e9a9d;--none-bg:#243135;--focus:#6fb7d0}
+  :root{--page:#11191b;--surface:#182326;--ink:#e4ecec;--muted:#a3b2b5;--line:#2c3c40;
+        --forecast:#6ea8ec;--reading:#ef7a6c;--nochange:#7c898c;
+        --grid-major:#24403a;--grid-minor:#1c2e2b;
+        --high:#e5a752;--high-bg:#3a2b12;--normal:#5ec29b;--normal-bg:#173529;--stale:#93a0a3;--stale-bg:#253235;--focus:#6ea8ec}
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 48px}
-h1{font-size:clamp(1.6rem,3.2vw,2.3rem);font-weight:600;line-height:1.15;margin:0 0 10px;letter-spacing:-.01em;max-width:24ch}
-.lede{color:var(--slate);font-size:1.02rem;line-height:1.55;margin:0 0 20px;max-width:66ch}
-.strip{border-left:3px solid var(--ink);padding:4px 0 4px 14px;margin:0 0 24px;font-size:.93rem;line-height:1.55;max-width:74ch}
-.strip strong{font-weight:600}
-.alert{background:var(--warn-bg);color:var(--ink);padding:10px 14px;margin:0 0 20px;font-size:.93rem;display:none}
-.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
-#map{height:460px;border:1px solid var(--rule);background:var(--panel)}
-@media (max-width:820px){#map{height:340px}}
-.legend{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0 0;font-size:.85rem;color:var(--slate)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:12px;height:12px;border-radius:50%;display:inline-block;border:3px solid currentColor;background:transparent}
-.list{border-top:1px solid var(--rule)}
-.st{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;
-    background:none;border:0;border-bottom:1px solid var(--rule);padding:14px 4px;color:inherit;font:inherit;cursor:pointer}
-.st:hover{background:var(--panel)}
-.st[aria-pressed="true"]{background:var(--panel);box-shadow:inset 3px 0 0 var(--ink)}
-.st:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-@media (max-width:520px){.st{grid-template-columns:1fr auto}.st .pill{grid-column:1/-1;justify-self:start}}
-.st .nm{font-weight:600;font-size:1rem}
-.st .ty{color:var(--slate);font-size:.85rem}
-.st .val{text-align:right;font-size:1.35rem;font-weight:500}
-.st .val small{display:block;font-size:.75rem;color:var(--slate);font-weight:400}
-.pill{font-size:.8rem;padding:3px 9px;border-radius:999px;white-space:nowrap}
-.pill.warn{background:var(--warn-bg);color:var(--warn)}
-.pill.ok{background:var(--ok-bg);color:var(--ok)}
-.pill.none{background:var(--none-bg);color:var(--slate)}
-.detail{background:var(--panel);border:1px solid var(--rule);padding:16px 18px;margin-top:18px}
-.detail h2{font-size:1.05rem;margin:0 0 4px;font-weight:600}
-.detail p{margin:0 0 10px;color:var(--slate);font-size:.9rem;line-height:1.5}
-.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;margin:12px 0 0}
-.kv div span{display:block;font-size:.8rem;color:var(--slate)}
-.kv div b{font-weight:500;font-size:1.15rem}
-.gauge{height:6px;background:var(--rule);position:relative;margin-top:6px}
-.gauge i{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
-.gauge u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--warn)}
-h2.sec{font-size:1.2rem;font-weight:600;margin:40px 0 6px}
-.sub{color:var(--slate);font-size:.92rem;margin:0 0 14px;max-width:70ch;line-height:1.5}
-.tbl{overflow-x:auto;border-top:1px solid var(--ink)}
-table{border-collapse:collapse;width:100%;min-width:640px;font-size:.92rem}
-th,td{padding:10px 8px;border-bottom:1px solid var(--rule);text-align:right}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 22px 56px}
+
+h1{font-size:clamp(1.75rem,3.6vw,2.6rem);line-height:1.12;font-weight:700;letter-spacing:-.015em;margin:0 0 14px;max-width:21ch}
+.intro{max-width:64ch;margin:0 0 6px;color:var(--ink)}
+.intro + .intro{color:var(--muted)}
+.status{margin:22px 0 28px;padding:12px 16px;background:var(--surface);border-left:4px solid var(--forecast);max-width:72ch;font-size:.95rem}
+.warning{margin:-14px 0 28px;padding:12px 16px;background:var(--high-bg);max-width:72ch;font-size:.95rem;display:none}
+
+.top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:860px){.top{grid-template-columns:minmax(0,1fr)}}
+#map{height:430px;border:1px solid var(--line);background:var(--surface)}
+@media (max-width:860px){#map{height:320px}}
+@media (max-width:420px){.about{grid-template-columns:minmax(0,1fr)}}
+.mapnote{font-size:.85rem;color:var(--muted);margin:8px 0 0}
+
+.sites{background:var(--surface);border:1px solid var(--line)}
+.site{display:grid;grid-template-columns:1fr auto;gap:4px 14px;width:100%;text-align:left;background:none;border:0;
+      border-bottom:1px solid var(--line);padding:14px 16px;color:inherit;font:inherit;cursor:pointer}
+.site:last-child{border-bottom:0}
+.site:hover{background:var(--page)}
+.site[aria-pressed="true"]{box-shadow:inset 4px 0 0 var(--ink)}
+.site:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.site .name{font-weight:700}
+.site .kind{display:block;font-size:.85rem;color:var(--muted)}
+.site .num{text-align:right;font-size:1.4rem;font-weight:500;line-height:1.1}
+.site .num small{display:block;font-size:.78rem;font-weight:400;color:var(--muted);margin-top:3px}
+.state{grid-column:1/-1;font-size:.85rem;display:flex;align-items:center;gap:8px;color:var(--muted)}
+.state i{width:10px;height:10px;display:inline-block;flex:none}
+.state.high i{background:var(--high)} .state.normal i{background:var(--normal)}
+.state.stale i,.state.none i{background:transparent;border:2px solid var(--stale)}
+.state.high b{color:var(--high)} .state.normal b{color:var(--normal)} .state.stale b,.state.none b{color:var(--stale)}
+.state b{font-weight:500}
+
+.focus{margin-top:44px}
+h2{font-size:1.4rem;line-height:1.2;font-weight:700;margin:0 0 8px;letter-spacing:-.01em}
+h3{font-size:1.05rem;font-weight:700;margin:0 0 6px}
+.lead{max-width:66ch;margin:0 0 18px;color:var(--muted)}
+.figures{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px 22px;margin:0 0 24px}
+.figures div{border-top:2px solid var(--ink);padding-top:8px}
+.figures span{display:block;font-size:.82rem;color:var(--muted)}
+.figures b{font-size:1.25rem;font-weight:500}
+.bar{height:6px;background:var(--line);position:relative;margin-top:7px}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.bar u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--high);left:50%}
+
+.chartbox{background:var(--surface);border:1px solid var(--line);padding:16px 12px 8px}
+.key{font-size:.88rem;color:var(--muted);margin:0 4px 10px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.key span{display:inline-flex;align-items:center;gap:7px}
+.key svg{flex:none}
+#chart{width:100%;min-height:200px}
+#chart svg{display:block;width:100%;height:auto}
+#chart text{font-family:inherit;fill:var(--muted)}
+.empty{color:var(--muted);padding:14px 4px;margin:0}
+
+.board{margin-top:52px}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:660px;font-size:.93rem}
+th,td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
 th:first-child,td:first-child{text-align:left}
-th{font-weight:500;color:var(--slate);font-size:.82rem}
-tr.all td{font-weight:600;border-bottom:2px solid var(--ink)}
-.empty{padding:18px 0;color:var(--slate)}
-.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px 32px;font-size:.9rem;line-height:1.6;color:var(--slate)}
-.method p{margin:0}
-.method b{color:var(--ink);font-weight:600}
-footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-size:.8rem;color:var(--slate);line-height:1.6}
-a{color:inherit;text-underline-offset:3px}
-.leaflet-container{font-family:inherit}
-.leaflet-tooltip.lbl{background:var(--panel);color:var(--ink);border:1px solid var(--rule);box-shadow:none;font-size:.78rem;padding:2px 6px}
+th{font-weight:500;color:var(--muted);font-size:.84rem;line-height:1.35}
+tbody tr:last-child td{border-bottom:0}
+tr.total td{font-weight:700;border-top:2px solid var(--ink)}
+td small{color:var(--muted);font-weight:400}
+.tablenote{font-size:.88rem;color:var(--muted);max-width:72ch;margin:10px 0 0}
+
+.about{margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:28px 56px}
+.about section p{margin:0 0 10px;max-width:60ch}
+
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+footer p{margin:0 0 6px;max-width:80ch}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px}
+
+.leaflet-container{font-family:inherit;background:var(--surface)}
+.leaflet-tooltip.lbl{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;font-size:.8rem;padding:2px 7px;border-radius:0}
 .leaflet-tooltip.lbl::before{display:none}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Six-hour air pollution forecasts for London, logged before the answer exists</h1>
-  <p class="lede">A frozen forecasting model predicts fine-particle pollution (PM2.5) six hours ahead at four monitoring sites. Each forecast is written to a public, append-only log before the real reading is published, then scored when it arrives.</p>
-  <p class="strip" id="strip">Loading the latest run…</p>
-  <p class="alert" id="alert" role="status"></p>
 
-  <div class="grid">
+  <h1>London air pollution forecasts, logged before the readings are published</h1>
+  <p class="intro">A fixed model forecasts fine-particle pollution (PM2.5) six hours ahead at four London monitoring sites. Each forecast is saved to a public log before the official reading comes out, then checked against that reading once it is published.</p>
+  <p class="intro">PM2.5 is measured in micrograms per cubic metre of air (µg/m³). For scale, the World Health Organization's guideline for a 24-hour average is 15 µg/m³.</p>
+
+  <p class="status" id="status">Loading the latest forecasts.</p>
+  <p class="warning" id="warning" role="status"></p>
+
+  <div class="top">
     <div>
       <div id="map" role="region" aria-label="Map of the four monitoring sites"></div>
-      <div class="legend" aria-label="Colour key">
-        <span style="color:var(--warn)"><i class="sw"></i><span style="color:var(--slate)">Recent forecasts poor</span></span>
-        <span style="color:var(--ok)"><i class="sw"></i><span style="color:var(--slate)">Recent forecasts fine</span></span>
-        <span style="color:var(--none)"><i class="sw"></i><span style="color:var(--slate)">No recent data</span></span>
-      </div>
+      <p class="mapnote">Choose a site on the map or in the list to see its forecasts against the published readings.</p>
     </div>
-    <div>
-      <div class="list" id="list" aria-label="Stations"></div>
-      <div class="detail" id="detail" aria-live="polite"></div>
-    </div>
+    <div class="sites" id="sites" aria-label="Monitoring sites"></div>
   </div>
 
-  <h2 class="sec">Scoreboard</h2>
-  <p class="sub">Average forecast error in µg/m³ for forecasts whose real reading has now been published. "No change" is the simplest possible forecast: the level six hours ago. Descriptive only until the pre-registered minimum of 26 weeks, including a full January to March, has passed.</p>
-  <div class="tbl" id="board"></div>
+  <section class="focus" aria-live="polite">
+    <h2 id="focus-title">Marylebone Road</h2>
+    <p class="lead" id="focus-text"></p>
+    <div class="figures" id="figures"></div>
+    <div class="chartbox">
+      <p class="key">
+        <span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--forecast)" stroke-width="2"/><circle cx="13" cy="5" r="3" fill="var(--forecast)"/></svg>Model forecast</span>
+        <span><svg width="10" height="10" aria-hidden="true"><rect x="1" y="1" width="8" height="8" fill="var(--reading)"/></svg>Published reading</span>
+        <span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--nochange)" stroke-width="2" stroke-dasharray="4 3"/></svg>No-change forecast</span>
+      </p>
+      <div id="chart"></div>
+    </div>
+  </section>
 
-  <h2 class="sec">How it works</h2>
-  <div class="method">
-    <p><b>The model is frozen.</b> A gradient-boosted model (LightGBM) trained once on 2018–2025 data and never retrained. Rebuilt from its recipe, it reproduces the evaluated model's forecasts exactly, and gives identical numbers on Windows and Linux.</p>
-    <p><b>The warning is simple on purpose.</b> A site turns amber when the model's average error over the previous day is above a threshold fixed in advance. In backtesting, a more complex "watcher" model did no better than this rule.</p>
-    <p><b>The data is late.</b> DEFRA publishes readings in a daily batch, roughly 8 to 15 hours behind. So forecasts are made from the newest published hour, for times that have passed but whose readings are not yet public.</p>
-    <p><b>Nothing is edited afterwards.</b> Forecasts and scores go to separate append-only files on a branch that blocks rewrites. Every rule used here was committed to the project spec before the first live forecast.</p>
+  <section class="board">
+    <h2>How the forecasts have done so far</h2>
+    <p class="lead">Error is the average gap between a forecast and the reading it was checked against, in µg/m³. Lower is better. The no-change forecast simply assumes the level six hours later will be the same as now. It is the bar any real model has to beat.</p>
+    <div class="tablewrap" id="board"></div>
+    <p class="tablenote">The six forecasts from one night are closely linked, so a night counts as roughly one piece of evidence, not six. I committed in advance not to draw conclusions from this table until at least 26 weeks have been scored, including a full January to March.</p>
+  </section>
+
+  <div class="about">
+    <section>
+      <h3>How the forecasts are made</h3>
+      <p>The model is LightGBM, a gradient-boosted decision tree method. It was trained once on 2018 to 2025 data from each site, using the previous day of pollution and weather readings, and has not been retrained since. The live log is therefore a test of the same model that was evaluated in the project.</p>
+      <p>Rebuilt from its saved settings, the model reproduces the evaluated forecasts exactly, on both Windows and Linux.</p>
+    </section>
+    <section>
+      <h3>What the amber warning means</h3>
+      <p>A site turns amber when the model's average error over the previous 24 hours is above a limit fixed for that site before the first live forecast. It is a reason to treat the current number with more caution. It does not change the forecast.</p>
+      <p>In the project's backtest, a more complex warning model was not reliably better than this simple rule. It did no better at Marylebone Road or on the 2025 holdout year, and did better at the other three sites only in the main test. Switching to the no-change forecast whenever a warning fired made overall error worse, which is why this page warns rather than switches.</p>
+    </section>
+    <section>
+      <h3>Why only night-time hours are scored</h3>
+      <p>DEFRA publishes readings once a day, usually 8 to 15 hours after they are taken. When the logger runs in the morning, the newest reading is from around 11pm. A forecast only counts if its own reading has not yet been published, so in practice only forecasts for roughly midnight to 6am can be logged in time.</p>
+      <p>The live scores therefore cover night-time hours, when pollution is usually lower and steadier. They are not directly comparable with the backtest, which scored every hour of the day.</p>
+    </section>
+    <section>
+      <h3>Nothing is edited afterwards</h3>
+      <p>Forecasts and scores are written to separate files that can only be added to, on a branch that blocks rewrites. Every rule used on this page was committed to the project specification before the first live forecast was made.</p>
+    </section>
   </div>
 
   <footer>
-    <p><a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast">Project repository</a> · <a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/tree/live-log/data/live">Raw live log</a> · <a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/blob/main/PROJECT_SPEC.md">Pre-registered spec</a></p>
-    <p>Air quality data: DEFRA UK-AIR, © Crown copyright, Open Government Licence v3.0. Weather: Open-Meteo, CC BY 4.0. Map tiles: © Esri and its data providers, © OpenStreetMap contributors.</p>
+    <p>Code and full write-up are in the <a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast">project repository</a>. The <a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/tree/live-log/data/live">raw live log</a> and the <a href="https://github.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/blob/main/PROJECT_SPEC.md">pre-registered specification</a> are public.</p>
+    <p>Air quality data from DEFRA UK-AIR, Crown copyright, Open Government Licence v3.0. Weather from Open-Meteo, CC BY 4.0. Map tiles from Esri and OpenStreetMap contributors.</p>
   </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const BASE = "https://raw.githubusercontent.com/abdullahiali1545-arch/when-should-you-trust-the-forecast/live-log/data/live/";
-const STATIONS = {
-  MY1: {name: "Marylebone Road", type: "Kerbside, central London", lat: 51.52253, lon: -0.154611},
-  KC1: {name: "North Kensington", type: "Urban background", lat: 51.52105, lon: -0.213419},
-  BEX: {name: "Bexley", type: "Suburban background", lat: 51.46603, lon: 0.184806},
-  HRL: {name: "Harlington", type: "Urban industrial, near Heathrow", lat: 51.48879, lon: -0.441614}
+const SITES = {
+  MY1: {name: "Marylebone Road", kind: "Roadside, central London", lat: 51.52253, lon: -0.154611},
+  KC1: {name: "North Kensington", kind: "Residential background", lat: 51.52105, lon: -0.213419},
+  BEX: {name: "Bexley", kind: "Suburban background", lat: 51.46603, lon: 0.184806},
+  HRL: {name: "Harlington", kind: "Industrial, near Heathrow", lat: 51.48879, lon: -0.441614}
 };
-const LABEL = {warn: "Recent forecasts poor", ok: "Recent forecasts fine", none: "No recent data"};
-const COLOR = {warn: "--warn", ok: "--ok", none: "--none"};
+const STATE = {
+  high:   {label: "Recent error high",   colour: "--high"},
+  normal: {label: "Recent error normal", colour: "--normal"},
+  stale:  {label: "Not updated",         colour: "--stale"},
+  none:   {label: "No forecast yet",     colour: "--stale"}
+};
+const STALE_AFTER_H = 36;   // newest reading older than this: show as not updated
 
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const fmt1 = x => (x == null || isNaN(x)) ? "–" : Number(x).toFixed(1);
-const tLocal = iso => new Intl.DateTimeFormat("en-GB", {weekday: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London"}).format(new Date(iso));
+const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const one = x => (x == null || isNaN(x)) ? "–" : Number(x).toFixed(1);
 const hoursSince = iso => (Date.now() - new Date(iso).getTime()) / 3.6e6;
+const london = (iso, o) => new Intl.DateTimeFormat("en-GB", {timeZone: "Europe/London", ...o}).format(new Date(iso));
+const clock = iso => london(iso, {hour: "2-digit", minute: "2-digit", hourCycle: "h23"});
+const londonDate = iso => london(iso, {year: "numeric", month: "2-digit", day: "2-digit"});
+function when(iso) {
+  const d = londonDate(iso), today = londonDate(new Date().toISOString());
+  const yest = londonDate(new Date(Date.now() - 864e5).toISOString());
+  const day = d === today ? "today" : d === yest ? "yesterday" : london(iso, {weekday: "short", day: "numeric", month: "short"});
+  return `${clock(iso)} ${day}`;
+}
+function hourWord(iso) {
+  const h = Number(london(iso, {hour: "numeric", hourCycle: "h23"}));
+  return h === 0 ? "12am" : h < 12 ? h + "am" : h === 12 ? "12pm" : (h - 12) + "pm";
+}
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
   const head = lines[0].split(",");
-  return lines.slice(1).map(l => {
-    const v = l.split(","), o = {};
+  return lines.slice(1).map(line => {
+    const v = line.split(","), o = {};
     head.forEach((h, i) => o[h] = v[i]);
     for (const k of ["yhat_F3", "yhat_F0", "resid_mae_24h", "threshold", "data_delay_h", "y_true"])
-      if (k in o) o[k] = o[k] === "" ? null : Number(o[k]);
+      if (k in o) o[k] = o[k] === "" || o[k] == null ? null : Number(o[k]);
     return o;
   });
 }
-
 async function get(name, kind) {
   try {
     const r = await fetch(BASE + name, {cache: "no-store"});
@@ -160,119 +234,183 @@ async function get(name, kind) {
   } catch (e) { return kind === "json" ? null : []; }
 }
 
-function latestPerStation(fc) {
-  const out = {};
-  for (const r of fc) if (!out[r.station] || r.origin_utc > out[r.station].origin_utc) out[r.station] = r;
-  return out;
+let DATA = {}, map, markers = {}, selected = "MY1";
+
+function siteState(code) {
+  const r = DATA.latest[code];
+  if (!r) return "none";
+  const run = DATA.summary && DATA.summary.stations && DATA.summary.stations[code] ? DATA.summary.stations[code].run_status : null;
+  if (run && run.error) return "stale";
+  if (hoursSince(r.latest_obs_utc) > STALE_AFTER_H) return "stale";
+  return r.flag === "warn" ? "high" : r.flag === "ok" ? "normal" : "none";
 }
 
-function mae(rows, key) {
-  const e = rows.map(r => Math.abs(r.y_true - r[key])).filter(x => !isNaN(x));
-  return e.length ? e.reduce((a, b) => a + b, 0) / e.length : null;
-}
-
-function scoreboard(fc, sc) {
-  const truth = new Map(sc.map(s => [s.station + "|" + s.origin_utc, s.y_true]));
-  const scored = fc.filter(r => truth.has(r.station + "|" + r.origin_utc))
-                   .map(r => ({...r, y_true: truth.get(r.station + "|" + r.origin_utc)}));
-  const row = (label, rows) => {
-    const w = rows.filter(r => r.flag === "warn"), o = rows.filter(r => r.flag === "ok");
-    return {label, n: rows.length, f3: mae(rows, "yhat_F3"), f0: mae(rows, "yhat_F0"),
-            w: mae(w, "yhat_F3"), nw: w.length, o: mae(o, "yhat_F3"), no: o.length};
-  };
-  return {rows: Object.keys(STATIONS).map(s => row(STATIONS[s].name, scored.filter(r => r.station === s))),
-          all: row("All four sites", scored), n: scored.length};
-}
-
-function state(latest, run) {
-  if (!latest) return "none";
-  if (hoursSince(latest.latest_obs_utc) > 48) return "none";
-  return latest.flag === "warn" ? "warn" : latest.flag === "ok" ? "ok" : "none";
-}
-
-let map, markers = {}, selected = "MY1", DATA = {};
+const BOUNDS = [[51.43, -0.47], [51.56, 0.22]];
+function fitLondon() { map.invalidateSize(); map.fitBounds(BOUNDS, {padding: [24, 24]}); }
 
 function drawMap() {
-  map = L.map("map", {scrollWheelZoom: false, zoomSnap: 0.25}).fitBounds([[51.43, -0.47], [51.56, 0.22]], {padding: [20, 20]});
+  map = L.map("map", {scrollWheelZoom: false, zoomSnap: 0.25});
+  fitLondon();
   const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const base = dark ? "World_Dark_Gray_Base" : "World_Light_Gray_Base";
-  L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${base}/MapServer/tile/{z}/{y}/{x}`,
+  const tiles = n => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${n}/MapServer/tile/{z}/{y}/{x}`;
+  L.tileLayer(tiles(dark ? "World_Dark_Gray_Base" : "World_Light_Gray_Base"),
     {maxZoom: 16, attribution: "Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors"}).addTo(map);
-  L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${dark ? "World_Dark_Gray_Reference" : "World_Light_Gray_Reference"}/MapServer/tile/{z}/{y}/{x}`,
-    {maxZoom: 16}).addTo(map);
-  for (const [code, s] of Object.entries(STATIONS)) {
-    const m = L.circleMarker([s.lat, s.lon], {radius: 11, weight: 4, fillOpacity: 0.25});
-    m.on("click", () => select(code));
-    m.bindTooltip(s.name, {permanent: window.innerWidth > 600, direction: code === "MY1" ? "right" : code === "KC1" ? "left" : "top", offset: code === "MY1" ? [12, 0] : code === "KC1" ? [-12, 0] : [0, -12], className: "lbl"});
+  L.tileLayer(tiles(dark ? "World_Dark_Gray_Reference" : "World_Light_Gray_Reference"), {maxZoom: 16}).addTo(map);
+  const place = {MY1: ["right", [12, 0]], KC1: ["top", [0, -12]], BEX: ["top", [0, -12]], HRL: ["bottom", [0, 12]]};
+  for (const [code, s] of Object.entries(SITES)) {
+    const m = L.circleMarker([s.lat, s.lon], {radius: 10, weight: 3, fillOpacity: 0.3});
+    m.on("click", () => choose(code));
+    m.bindTooltip(s.name, {permanent: window.innerWidth > 600, direction: place[code][0], offset: place[code][1], className: "lbl"});
     m.addTo(map); markers[code] = m;
   }
 }
 
-function paint() {
-  const {latest, summary} = DATA;
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-  for (const [code, s] of Object.entries(STATIONS)) {
-    const r = latest[code], st = state(r);
-    const c = css(COLOR[st]);
-    markers[code].setStyle({color: c, fillColor: c, radius: code === selected ? 14 : 11});
+function drawSites() {
+  const box = document.getElementById("sites");
+  box.innerHTML = "";
+  for (const [code, s] of Object.entries(SITES)) {
+    const r = DATA.latest[code], st = siteState(code), c = cssVar(STATE[st].colour);
+    const hollow = st === "stale" || st === "none";
+    markers[code].setStyle({color: c, fillColor: c, fillOpacity: hollow ? 0 : 0.3, dashArray: hollow ? "3 4" : null, radius: code === selected ? 13 : 10});
     const b = document.createElement("button");
-    b.className = "st"; b.setAttribute("aria-pressed", code === selected);
-    b.innerHTML = `<span class="pill ${st}">${LABEL[st]}</span>
-      <span><span class="nm">${s.name}</span><br><span class="ty">${s.type}</span></span>
-      <span class="val">${r ? fmt1(r.yhat_F3) : "–"}<small>${r ? "µg/m³ at " + tLocal(r.target_utc) : "no forecast"}</small></span>`;
-    b.onclick = () => select(code);
-    list.appendChild(b);
+    b.className = "site";
+    b.setAttribute("aria-pressed", code === selected);
+    b.innerHTML = `
+      <span><span class="name">${s.name}</span><span class="kind">${s.kind}</span></span>
+      <span class="num">${r ? one(r.yhat_F3) : "–"}<small>${r ? "µg/m³ at " + when(r.target_utc) : "no forecast"}</small></span>
+      <span class="state ${st}"><i aria-hidden="true"></i><b>${STATE[st].label}</b></span>`;
+    b.onclick = () => choose(code);
+    box.appendChild(b);
   }
-  const r = latest[selected], s = STATIONS[selected], st = state(r);
-  const run = summary && summary.stations && summary.stations[selected] ? summary.stations[selected].run_status : null;
-  const err = run && run.error ? `<p>The last run could not update this site: ${run.error.split(":")[0]}. It retries automatically on the next run.</p>` : "";
-  const d = document.getElementById("detail");
-  if (!r) { d.innerHTML = `<h2>${s.name}</h2><p>No forecasts logged for this site yet.</p>${err}`; return; }
-  const pct = Math.min(100, 100 * r.resid_mae_24h / (2 * r.threshold));
-  d.innerHTML = `<h2>${s.name}</h2>
-    <p>${st === "warn" ? "The model's forecasts here have been poor over the past day, so treat this one with extra caution."
-       : st === "ok" ? "The model's recent forecasts here have been within its usual error."
-       : "Readings for this site are out of date, so no judgement is shown."}</p>${err}
-    <div class="kv">
-      <div><span>Forecast for ${tLocal(r.target_utc)}</span><b>${fmt1(r.yhat_F3)} µg/m³</b></div>
-      <div><span>No-change forecast</span><b>${fmt1(r.yhat_F0)} µg/m³</b></div>
-      <div><span>Error over the past day</span><b>${fmt1(r.resid_mae_24h)}</b>
-        <div class="gauge" aria-hidden="true"><i style="width:${pct}%"></i><u style="left:50%"></u></div></div>
-      <div><span>Warning threshold</span><b>${fmt1(r.threshold)}</b></div>
-      <div><span>Newest published reading</span><b>${tLocal(r.latest_obs_utc)}</b></div>
-      <div><span>Forecast logged</span><b>${tLocal(r.run_utc)}</b></div>
-    </div>`;
 }
 
-function select(code) { selected = code; paint(); }
-
-function board(fc, sc) {
-  const b = scoreboard(fc, sc), el = document.getElementById("board");
-  if (!b.n) { el.innerHTML = `<p class="empty">No forecasts have been scored yet. The first readings arrive with DEFRA's next daily batch.</p>`; return; }
-  const tr = (r, cls = "") => `<tr class="${cls}"><td>${r.label}</td><td>${r.n}</td><td>${fmt1(r.f3)}</td><td>${fmt1(r.f0)}</td>
-     <td>${fmt1(r.w)} <span style="color:var(--slate)">(${r.nw})</span></td><td>${fmt1(r.o)} <span style="color:var(--slate)">(${r.no})</span></td></tr>`;
-  el.innerHTML = `<table><thead><tr><th>Site</th><th>Scored</th><th>Model error</th><th>No-change error</th>
-    <th>Model error, amber hours (n)</th><th>Model error, other hours (n)</th></tr></thead>
-    <tbody>${b.rows.map(r => tr(r)).join("")}${tr(b.all, "all")}</tbody></table>`;
+function drawFocus() {
+  const s = SITES[selected], r = DATA.latest[selected], st = siteState(selected);
+  const run = DATA.summary && DATA.summary.stations && DATA.summary.stations[selected] ? DATA.summary.stations[selected].run_status : null;
+  document.getElementById("focus-title").textContent = s.name;
+  const text = document.getElementById("focus-text"), figs = document.getElementById("figures");
+  if (!r) { text.textContent = "No forecasts have been logged for this site yet."; figs.innerHTML = ""; drawChart(); return; }
+  const msg = {
+    high: "The model's forecasts here have been less accurate than usual over the past day, so treat the latest one with more caution.",
+    normal: "The model's forecasts here have been within their usual range of error over the past day.",
+    stale: run && run.error
+      ? "DEFRA's server did not respond when the logger last tried to update this site, so the figures below are from an earlier run. It will try again on the next run."
+      : "No new readings have been published for this site recently, so the figures below may be out of date.",
+    none: "No judgement is available for this site."
+  }[st];
+  text.textContent = msg;
+  const pct = r.threshold ? Math.min(100, 100 * r.resid_mae_24h / (2 * r.threshold)) : 0;
+  figs.innerHTML = `
+    <div><span>Forecast for ${when(r.target_utc)}</span><b>${one(r.yhat_F3)} µg/m³</b></div>
+    <div><span>No-change forecast</span><b>${one(r.yhat_F0)} µg/m³</b></div>
+    <div><span>Error over the past day, against its limit of ${one(r.threshold)}</span><b>${one(r.resid_mae_24h)}</b>
+      <div class="bar" aria-hidden="true"><i style="width:${pct}%"></i><u></u></div></div>
+    <div><span>Newest published reading</span><b>${when(r.latest_obs_utc)}</b></div>
+    <div><span>Forecast logged</span><b>${when(r.run_utc)}</b></div>`;
+  drawChart();
 }
+
+function drawChart() {
+  const el = document.getElementById("chart");
+  const rows = DATA.joined.filter(r => r.station === selected);
+  if (!rows.length) { el.innerHTML = `<p class="empty">Nothing to show for this site yet.</p>`; return; }
+
+  const W = Math.max(300, el.clientWidth || 640), H = 270;
+  const m = {l: 38, r: 10, t: 12, b: 46};
+  const byRun = new Map();
+  for (const r of rows) { if (!byRun.has(r.run_utc)) byRun.set(r.run_utc, []); byRun.get(r.run_utc).push(r); }
+  const fit = Math.max(2, Math.floor((W - m.l - m.r) / 78));
+  const groups = [...byRun.keys()].sort().slice(-Math.min(10, fit))
+    .map(k => byRun.get(k).sort((a, b) => a.target_utc < b.target_utc ? -1 : 1));
+
+  const vals = groups.flat().flatMap(r => [r.yhat_F3, r.yhat_F0, r.y_true]).filter(v => v != null && !isNaN(v));
+  const top = Math.max(10, Math.ceil(Math.max(...vals) * 1.1 / 5) * 5);
+  const major = top <= 30 ? 5 : 10, minor = top <= 30 ? 1 : 2;
+  const y = v => m.t + (H - m.t - m.b) * (1 - v / top);
+  const gw = (W - m.l - m.r) / groups.length, gap = Math.min(18, gw * 0.18);
+  const col = {f: cssVar("--forecast"), y: cssVar("--reading"), n: cssVar("--nochange"), gM: cssVar("--grid-major"), gm: cssVar("--grid-minor"), ink: cssVar("--ink")};
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Forecasts and published readings for ${SITES[selected].name}, grouped by night">`;
+  for (let v = 0; v <= top; v += minor) {
+    const isMajor = v % major === 0;
+    svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${isMajor ? col.gM : col.gm}" stroke-width="1"/>`;
+    if (isMajor) svg += `<text x="${m.l - 7}" y="${y(v) + 4}" text-anchor="end" font-size="12">${v}</text>`;
+  }
+  svg += `<text x="4" y="${m.t + 2}" font-size="11" dominant-baseline="hanging" transform="rotate(-90 4 ${m.t + 2}) translate(-${H - m.t - m.b} 0)">µg/m³</text>`;
+
+  groups.forEach((g, i) => {
+    const x0 = m.l + i * gw + gap / 2, inner = gw - gap;
+    const x = k => x0 + inner * (k + 0.5) / g.length;
+    for (let k = 0; k < g.length; k++)
+      svg += `<line x1="${x(k)}" x2="${x(k)}" y1="${m.t}" y2="${H - m.b}" stroke="${col.gm}" stroke-width="1"/>`;
+    const path = key => g.map((r, k) => r[key] == null ? null : `${x(k)},${y(r[key])}`).filter(Boolean).join(" ");
+    svg += `<polyline points="${path("yhat_F0")}" fill="none" stroke="${col.n}" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+    svg += `<polyline points="${path("yhat_F3")}" fill="none" stroke="${col.f}" stroke-width="2"/>`;
+    g.forEach((r, k) => {
+      svg += `<circle cx="${x(k)}" cy="${y(r.yhat_F3)}" r="3.2" fill="${col.f}"><title>${clock(r.target_utc)}: forecast ${one(r.yhat_F3)}</title></circle>`;
+      if (r.y_true != null) svg += `<rect x="${x(k) - 3.5}" y="${y(r.y_true) - 3.5}" width="7" height="7" fill="${col.y}"><title>${clock(r.target_utc)}: reading ${one(r.y_true)}</title></rect>`;
+    });
+    const cx = x0 + inner / 2, first = g[0].target_utc, last = g[g.length - 1].target_utc;
+    const scored = g.some(r => r.y_true != null);
+    svg += `<text x="${cx}" y="${H - m.b + 18}" text-anchor="middle" font-size="12" fill="${col.ink}">${london(first, {day: "numeric", month: "short"})}</text>`;
+    svg += `<text x="${cx}" y="${H - m.b + 33}" text-anchor="middle" font-size="11">${scored ? hourWord(first) + "–" + hourWord(last) : "awaiting reading"}</text>`;
+  });
+  svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="${col.ink}" stroke-width="1"/></svg>`;
+  el.innerHTML = svg;
+}
+
+function mae(rows, key) {
+  const e = rows.map(r => Math.abs(r.y_true - r[key])).filter(v => !isNaN(v));
+  return e.length ? e.reduce((a, b) => a + b, 0) / e.length : null;
+}
+function drawBoard() {
+  const scored = DATA.joined.filter(r => r.y_true != null);
+  const el = document.getElementById("board");
+  if (!scored.length) { el.innerHTML = `<p class="empty" style="padding:14px 16px">No forecasts have been checked yet. The first readings arrive with DEFRA's next daily batch.</p>`; return; }
+  const nights = rows => new Set(rows.map(r => r.station + "|" + r.run_utc)).size;
+  const nightWord = n => `${n} night${n === 1 ? "" : "s"}`;
+  const line = (label, rows, cls = "") => {
+    const hi = rows.filter(r => r.flag === "warn"), ok = rows.filter(r => r.flag === "ok");
+    return `<tr class="${cls}"><td>${label}</td>
+      <td>${nights(rows)} <small>(${rows.length} hours)</small></td>
+      <td>${one(mae(rows, "yhat_F3"))}</td><td>${one(mae(rows, "yhat_F0"))}</td>
+      <td>${hi.length ? one(mae(hi, "yhat_F3")) + ` <small>(${nightWord(nights(hi))})</small>` : "–"}</td>
+      <td>${ok.length ? one(mae(ok, "yhat_F3")) + ` <small>(${nightWord(nights(ok))})</small>` : "–"}</td></tr>`;
+  };
+  el.innerHTML = `<table><thead><tr><th>Site</th><th>Nights checked</th><th>Model error</th><th>No-change error</th>
+    <th>Model error when amber</th><th>Model error otherwise</th></tr></thead><tbody>
+    ${Object.keys(SITES).map(c => line(SITES[c].name, scored.filter(r => r.station === c))).join("")}
+    ${line("All four sites", scored, "total")}</tbody></table>`;
+}
+
+function choose(code) { selected = code; drawSites(); drawFocus(); }
 
 async function main() {
   drawMap();
   const [fc, sc, summary] = await Promise.all([get("forecasts.csv"), get("scores.csv"), get("summary.json", "json")]);
-  DATA = {latest: latestPerStation(fc), summary};
-  const first = fc.length ? fc.map(r => r.run_utc).sort()[0] : null;
-  const obs = Object.values(DATA.latest).map(r => r.latest_obs_utc).sort().pop();
-  const strip = document.getElementById("strip");
-  strip.innerHTML = fc.length
-    ? `<strong>Live since ${new Intl.DateTimeFormat("en-GB", {day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London"}).format(new Date(first))}.</strong> ${fc.length} forecasts logged. Newest published reading: ${tLocal(obs)}, about ${Math.round(hoursSince(obs))} hours ago.`
-    : "No forecasts logged yet.";
+  const truth = new Map(sc.map(s => [s.station + "|" + s.origin_utc, s.y_true]));
+  const joined = fc.map(r => ({...r, y_true: truth.has(r.station + "|" + r.origin_utc) ? truth.get(r.station + "|" + r.origin_utc) : null}));
+  const latest = {};
+  for (const r of fc) if (!latest[r.station] || r.origin_utc > latest[r.station].origin_utc) latest[r.station] = r;
+  DATA = {latest, summary, joined};
+
+  const status = document.getElementById("status");
+  if (fc.length) {
+    const first = fc.map(r => r.run_utc).sort()[0];
+    const checked = joined.filter(r => r.y_true != null).length;
+    const updated = summary ? when(summary.generated_utc) : when(fc.map(r => r.run_utc).sort().pop());
+    status.textContent = `Running since ${london(first, {day: "numeric", month: "long", year: "numeric"})}. ` +
+      `${fc.length} forecasts logged and ${checked} checked so far. Last updated at ${updated}. All times are UK time.`;
+  } else status.textContent = "No forecasts have been logged yet.";
+
   if (summary && hoursSince(summary.generated_utc) > 12) {
-    const a = document.getElementById("alert");
-    a.textContent = `The logger last ran ${Math.round(hoursSince(summary.generated_utc))} hours ago, so this page may be behind.`;
-    a.style.display = "block";
+    const w = document.getElementById("warning");
+    w.textContent = `The logger last ran ${Math.round(hoursSince(summary.generated_utc))} hours ago, so the forecasts below may be out of date.`;
+    w.style.display = "block";
   }
-  paint(); board(fc, sc);
+  drawSites(); drawFocus(); drawBoard();
+  let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { drawChart(); fitLondon(); }, 150); });
+  fitLondon();
 }
 main();
 </script>
