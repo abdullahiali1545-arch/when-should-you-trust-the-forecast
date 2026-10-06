@@ -1,113 +1,113 @@
 {
-  "generated_utc": "2026-10-05T22:44:33Z",
+  "generated_utc": "2026-10-06T03:06:17Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-04T23:00:00Z",
-        "data_delay_h": 23.7,
+        "latest_obs_utc": "2026-10-05T23:00:00Z",
+        "data_delay_h": 4.1,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-04T23:00:00Z",
-        "target_utc": "2026-10-05T05:00:00Z",
-        "yhat_F3": 9.89938124647897,
+        "origin_utc": "2026-10-05T23:00:00Z",
+        "target_utc": "2026-10-06T05:00:00Z",
+        "yhat_F3": 6.097089428922477,
         "flag": "ok",
-        "data_delay_h": 8.2
+        "data_delay_h": 4.1
       },
       "scoreboard": {
-        "n_scored": 30,
-        "mae_F3": 4.11,
-        "mae_persistence": 6.133,
-        "n_warn": 6,
-        "n_ok": 24,
+        "n_scored": 36,
+        "mae_F3": 4.308,
+        "mae_persistence": 6.056,
+        "n_warn": 11,
+        "n_ok": 25,
         "n_grey": 0,
-        "mae_F3_warn": 3.366,
-        "mae_F3_ok": 4.296
+        "mae_F3_warn": 4.46,
+        "mae_F3_ok": 4.241
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-04T23:00:00Z",
-        "data_delay_h": 23.7,
+        "latest_obs_utc": "2026-10-05T23:00:00Z",
+        "data_delay_h": 4.1,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-04T23:00:00Z",
-        "target_utc": "2026-10-05T05:00:00Z",
-        "yhat_F3": 5.601615440321443,
+        "origin_utc": "2026-10-05T23:00:00Z",
+        "target_utc": "2026-10-06T05:00:00Z",
+        "yhat_F3": 4.00452145685479,
         "flag": "ok",
-        "data_delay_h": 8.2
+        "data_delay_h": 4.1
       },
       "scoreboard": {
-        "n_scored": 30,
-        "mae_F3": 2.716,
-        "mae_persistence": 3.349,
-        "n_warn": 6,
-        "n_ok": 24,
+        "n_scored": 36,
+        "mae_F3": 2.431,
+        "mae_persistence": 2.979,
+        "n_warn": 11,
+        "n_ok": 25,
         "n_grey": 0,
-        "mae_F3_warn": 4.936,
-        "mae_F3_ok": 2.161
+        "mae_F3_warn": 3.219,
+        "mae_F3_ok": 2.085
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-04T23:00:00Z",
-        "data_delay_h": 23.7,
+        "latest_obs_utc": "2026-10-05T23:00:00Z",
+        "data_delay_h": 4.1,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-04T23:00:00Z",
-        "target_utc": "2026-10-05T05:00:00Z",
-        "yhat_F3": 5.704964332305049,
+        "origin_utc": "2026-10-05T23:00:00Z",
+        "target_utc": "2026-10-06T05:00:00Z",
+        "yhat_F3": 5.30094442782565,
         "flag": "ok",
-        "data_delay_h": 8.2
+        "data_delay_h": 4.1
       },
       "scoreboard": {
-        "n_scored": 30,
-        "mae_F3": 2.409,
-        "mae_persistence": 4.33,
+        "n_scored": 36,
+        "mae_F3": 2.569,
+        "mae_persistence": 4.106,
         "n_warn": 6,
-        "n_ok": 24,
+        "n_ok": 30,
         "n_grey": 0,
         "mae_F3_warn": 5.479,
-        "mae_F3_ok": 1.642
+        "mae_F3_ok": 1.986
       }
     },
     "HRL": {
       "run_status": {
-        "latest_obs_utc": "2026-10-04T20:00:00Z",
-        "data_delay_h": 26.7,
+        "latest_obs_utc": "2026-10-05T20:00:00Z",
+        "data_delay_h": 7.1,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-04T20:00:00Z",
-        "target_utc": "2026-10-05T02:00:00Z",
-        "yhat_F3": 5.150785424052583,
+        "origin_utc": "2026-10-05T20:00:00Z",
+        "target_utc": "2026-10-06T02:00:00Z",
+        "yhat_F3": 3.486302181141397,
         "flag": "ok",
-        "data_delay_h": 11.2
+        "data_delay_h": 7.1
       },
       "scoreboard": {
-        "n_scored": 24,
-        "mae_F3": 3.258,
-        "mae_persistence": 3.714,
+        "n_scored": 30,
+        "mae_F3": 2.861,
+        "mae_persistence": 3.423,
         "n_warn": 0,
-        "n_ok": 24,
+        "n_ok": 30,
         "n_grey": 0,
         "mae_F3_warn": null,
-        "mae_F3_ok": 3.258
+        "mae_F3_ok": 2.861
       }
     }
   },
