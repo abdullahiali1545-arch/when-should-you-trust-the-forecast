@@ -1,10 +1,15 @@
 {
-  "generated_utc": "2026-10-09T09:19:08Z",
+  "generated_utc": "2026-10-09T17:02:53Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "latest_obs_utc": "2026-10-08T23:00:00Z",
+        "data_delay_h": 18.0,
+        "shadow_forecasts": 180,
+        "new_forecasts": 0,
+        "new_skips": 6,
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-07T10:00:00Z",
@@ -26,7 +31,12 @@
     },
     "KC1": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "latest_obs_utc": "2026-10-08T23:00:00Z",
+        "data_delay_h": 18.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 0,
+        "new_skips": 0,
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-08T23:00:00Z",
@@ -48,7 +58,12 @@
     },
     "BEX": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "latest_obs_utc": "2026-10-08T23:00:00Z",
+        "data_delay_h": 18.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 0,
+        "new_skips": 0,
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-08T23:00:00Z",
@@ -70,7 +85,12 @@
     },
     "HRL": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "latest_obs_utc": "2026-10-08T12:00:00Z",
+        "data_delay_h": 29.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 0,
+        "new_skips": 0,
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-08T12:00:00Z",
