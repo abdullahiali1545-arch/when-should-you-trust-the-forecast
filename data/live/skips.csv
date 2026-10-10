@@ -41,3 +41,9 @@ run_utc,station,origin_utc,reason
 2026-10-10T20:09:36Z,MY1,2026-10-09T12:00:00Z,missing inputs: pm2_5_lag_24
 2026-10-10T20:09:36Z,MY1,2026-10-09T13:00:00Z,missing inputs: pm2_5_lag_24
 2026-10-10T20:09:36Z,KC1,2026-10-09T23:00:00Z,missing inputs: no2_lag_0
+2026-10-10T23:39:19Z,MY1,2026-10-09T09:00:00Z,missing inputs: pm2_5_lag_24
+2026-10-10T23:39:19Z,MY1,2026-10-09T10:00:00Z,missing inputs: pm2_5_lag_24
+2026-10-10T23:39:19Z,MY1,2026-10-09T11:00:00Z,missing inputs: pm2_5_lag_24
+2026-10-10T23:39:19Z,MY1,2026-10-09T12:00:00Z,missing inputs: pm2_5_lag_24
+2026-10-10T23:39:19Z,MY1,2026-10-09T13:00:00Z,missing inputs: pm2_5_lag_24
+2026-10-10T23:39:19Z,KC1,2026-10-09T23:00:00Z,missing inputs: no2_lag_0
