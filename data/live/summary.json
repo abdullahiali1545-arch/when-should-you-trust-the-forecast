@@ -1,108 +1,113 @@
 {
-  "generated_utc": "2026-10-13T22:54:00Z",
+  "generated_utc": "2026-10-14T01:59:08Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-12T23:00:00Z",
-        "data_delay_h": 23.9,
+        "latest_obs_utc": "2026-10-14T00:00:00Z",
+        "data_delay_h": 2.0,
         "shadow_forecasts": 166,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-12T23:00:00Z",
-        "target_utc": "2026-10-13T05:00:00Z",
-        "yhat_F3": 4.811449897200362,
+        "origin_utc": "2026-10-14T00:00:00Z",
+        "target_utc": "2026-10-14T06:00:00Z",
+        "yhat_F3": 10.390713347884518,
         "flag": "ok",
-        "data_delay_h": 3.1
+        "data_delay_h": 2.0
       },
       "scoreboard": {
-        "n_scored": 61,
-        "mae_F3": 3.986,
-        "mae_persistence": 5.377,
+        "n_scored": 67,
+        "mae_F3": 3.793,
+        "mae_persistence": 5.015,
         "n_warn": 11,
-        "n_ok": 49,
+        "n_ok": 55,
         "n_grey": 1,
         "mae_F3_warn": 4.46,
-        "mae_F3_ok": 3.904
+        "mae_F3_ok": 3.678
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-12T23:00:00Z",
-        "data_delay_h": 23.9,
+        "latest_obs_utc": "2026-10-14T00:00:00Z",
+        "data_delay_h": 2.0,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-12T23:00:00Z",
-        "target_utc": "2026-10-13T05:00:00Z",
-        "yhat_F3": 2.831985093189841,
+        "origin_utc": "2026-10-14T00:00:00Z",
+        "target_utc": "2026-10-14T06:00:00Z",
+        "yhat_F3": 7.103319033591403,
         "flag": "ok",
-        "data_delay_h": 3.1
+        "data_delay_h": 2.0
       },
       "scoreboard": {
-        "n_scored": 77,
-        "mae_F3": 2.359,
-        "mae_persistence": 2.611,
+        "n_scored": 83,
+        "mae_F3": 2.31,
+        "mae_persistence": 2.471,
         "n_warn": 17,
-        "n_ok": 60,
+        "n_ok": 66,
         "n_grey": 0,
         "mae_F3_warn": 2.618,
-        "mae_F3_ok": 2.285
+        "mae_F3_ok": 2.231
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-12T23:00:00Z",
-        "data_delay_h": 23.9,
+        "latest_obs_utc": "2026-10-13T23:00:00Z",
+        "data_delay_h": 3.0,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-12T23:00:00Z",
-        "target_utc": "2026-10-13T05:00:00Z",
-        "yhat_F3": 2.131083770815952,
+        "origin_utc": "2026-10-13T23:00:00Z",
+        "target_utc": "2026-10-14T05:00:00Z",
+        "yhat_F3": 6.29297205766918,
         "flag": "ok",
-        "data_delay_h": 3.1
+        "data_delay_h": 3.0
       },
       "scoreboard": {
-        "n_scored": 78,
-        "mae_F3": 2.366,
-        "mae_persistence": 3.088,
+        "n_scored": 84,
+        "mae_F3": 2.307,
+        "mae_persistence": 2.879,
         "n_warn": 6,
-        "n_ok": 72,
+        "n_ok": 78,
         "n_grey": 0,
         "mae_F3_warn": 5.479,
-        "mae_F3_ok": 2.106
+        "mae_F3_ok": 2.063
       }
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "latest_obs_utc": "2026-10-13T20:00:00Z",
+        "data_delay_h": 6.0,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-11T19:00:00Z",
-        "target_utc": "2026-10-12T01:00:00Z",
-        "yhat_F3": 5.336430885085453,
+        "origin_utc": "2026-10-13T20:00:00Z",
+        "target_utc": "2026-10-14T02:00:00Z",
+        "yhat_F3": 5.810217275782708,
         "flag": "ok",
-        "data_delay_h": 14.4
+        "data_delay_h": 6.0
       },
       "scoreboard": {
-        "n_scored": 66,
-        "mae_F3": 2.114,
-        "mae_persistence": 2.413,
+        "n_scored": 72,
+        "mae_F3": 2.074,
+        "mae_persistence": 2.323,
         "n_warn": 1,
-        "n_ok": 65,
+        "n_ok": 71,
         "n_grey": 0,
         "mae_F3_warn": 2.396,
-        "mae_F3_ok": 2.11
+        "mae_F3_ok": 2.07
       }
     }
   },
