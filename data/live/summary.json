@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-10-14T13:49:57Z",
+  "generated_utc": "2026-10-14T18:42:52Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-10-14T00:00:00Z",
-        "data_delay_h": 13.8,
+        "data_delay_h": 18.7,
         "shadow_forecasts": 166,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -32,7 +32,7 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-10-14T00:00:00Z",
-        "data_delay_h": 13.8,
+        "data_delay_h": 18.7,
         "shadow_forecasts": 217,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -58,7 +58,12 @@
     },
     "BEX": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "latest_obs_utc": "2026-10-13T23:00:00Z",
+        "data_delay_h": 19.7,
+        "shadow_forecasts": 217,
+        "new_forecasts": 0,
+        "new_skips": 0,
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-13T23:00:00Z",
@@ -80,12 +85,7 @@
     },
     "HRL": {
       "run_status": {
-        "latest_obs_utc": "2026-10-13T20:00:00Z",
-        "data_delay_h": 17.8,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-10-13T20:00:00Z",
