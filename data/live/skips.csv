@@ -62,3 +62,8 @@ run_utc,station,origin_utc,reason
 2026-10-15T18:22:46Z,KC1,2026-10-14T19:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
 2026-10-15T18:22:46Z,BEX,2026-10-14T18:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
 2026-10-15T18:22:46Z,BEX,2026-10-14T19:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
+2026-10-15T22:26:56Z,MY1,2026-10-14T18:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
+2026-10-15T22:26:56Z,KC1,2026-10-14T18:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
+2026-10-15T22:26:56Z,KC1,2026-10-14T19:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
+2026-10-15T22:26:56Z,BEX,2026-10-14T18:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
+2026-10-15T22:26:56Z,BEX,2026-10-14T19:00:00Z,"missing inputs: pm2_5_lag_6,pm2_5_delta_6h"
