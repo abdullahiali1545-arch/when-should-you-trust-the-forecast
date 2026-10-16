@@ -1,86 +1,86 @@
 {
-  "generated_utc": "2026-10-16T01:28:54Z",
+  "generated_utc": "2026-10-16T07:18:51Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-14T23:00:00Z",
-        "data_delay_h": 26.5,
-        "shadow_forecasts": 159,
-        "new_forecasts": 0,
-        "new_skips": 1,
-        "new_scores": 0
+        "latest_obs_utc": "2026-10-15T23:00:00Z",
+        "data_delay_h": 8.3,
+        "shadow_forecasts": 157,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 5
       },
       "latest": {
-        "origin_utc": "2026-10-14T23:00:00Z",
-        "target_utc": "2026-10-15T05:00:00Z",
-        "yhat_F3": 8.904047027603706,
+        "origin_utc": "2026-10-15T23:00:00Z",
+        "target_utc": "2026-10-16T05:00:00Z",
+        "yhat_F3": 6.506091814008975,
         "flag": "ok",
-        "data_delay_h": 8.6
+        "data_delay_h": 8.3
       },
       "scoreboard": {
-        "n_scored": 73,
-        "mae_F3": 3.811,
-        "mae_persistence": 4.959,
+        "n_scored": 78,
+        "mae_F3": 3.698,
+        "mae_persistence": 4.821,
         "n_warn": 11,
-        "n_ok": 61,
+        "n_ok": 66,
         "n_grey": 1,
         "mae_F3_warn": 4.46,
-        "mae_F3_ok": 3.711
+        "mae_F3_ok": 3.585
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-14T23:00:00Z",
-        "data_delay_h": 26.5,
-        "shadow_forecasts": 210,
-        "new_forecasts": 0,
-        "new_skips": 2,
-        "new_scores": 0
+        "latest_obs_utc": "2026-10-15T23:00:00Z",
+        "data_delay_h": 8.3,
+        "shadow_forecasts": 208,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 4
       },
       "latest": {
-        "origin_utc": "2026-10-14T23:00:00Z",
-        "target_utc": "2026-10-15T05:00:00Z",
-        "yhat_F3": 5.513448245007407,
+        "origin_utc": "2026-10-15T23:00:00Z",
+        "target_utc": "2026-10-16T05:00:00Z",
+        "yhat_F3": 4.03245736093372,
         "flag": "ok",
-        "data_delay_h": 8.6
+        "data_delay_h": 8.3
       },
       "scoreboard": {
-        "n_scored": 89,
-        "mae_F3": 2.197,
-        "mae_persistence": 2.353,
+        "n_scored": 93,
+        "mae_F3": 2.166,
+        "mae_persistence": 2.309,
         "n_warn": 17,
-        "n_ok": 72,
+        "n_ok": 76,
         "n_grey": 0,
         "mae_F3_warn": 2.618,
-        "mae_F3_ok": 2.098
+        "mae_F3_ok": 2.065
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-14T23:00:00Z",
-        "data_delay_h": 26.5,
-        "shadow_forecasts": 210,
-        "new_forecasts": 0,
-        "new_skips": 2,
-        "new_scores": 0
+        "latest_obs_utc": "2026-10-15T23:00:00Z",
+        "data_delay_h": 8.3,
+        "shadow_forecasts": 208,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 4
       },
       "latest": {
-        "origin_utc": "2026-10-14T23:00:00Z",
-        "target_utc": "2026-10-15T05:00:00Z",
-        "yhat_F3": 6.086923914879523,
+        "origin_utc": "2026-10-15T23:00:00Z",
+        "target_utc": "2026-10-16T05:00:00Z",
+        "yhat_F3": 4.139150363960575,
         "flag": "ok",
-        "data_delay_h": 8.6
+        "data_delay_h": 8.3
       },
       "scoreboard": {
-        "n_scored": 90,
-        "mae_F3": 2.241,
-        "mae_persistence": 2.764,
+        "n_scored": 94,
+        "mae_F3": 2.22,
+        "mae_persistence": 2.697,
         "n_warn": 6,
-        "n_ok": 84,
+        "n_ok": 88,
         "n_grey": 0,
         "mae_F3_warn": 5.479,
-        "mae_F3_ok": 2.009
+        "mae_F3_ok": 1.998
       }
     },
     "HRL": {
