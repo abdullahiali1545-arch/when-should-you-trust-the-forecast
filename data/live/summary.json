@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-10-17T20:43:36Z",
+  "generated_utc": "2026-10-17T23:12:11Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-10-16T21:00:00Z",
-        "data_delay_h": 23.7,
+        "data_delay_h": 26.2,
         "shadow_forecasts": 167,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -32,7 +32,7 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-10-16T23:00:00Z",
-        "data_delay_h": 21.7,
+        "data_delay_h": 24.2,
         "shadow_forecasts": 208,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -81,7 +81,7 @@
     "HRL": {
       "run_status": {
         "latest_obs_utc": "2026-10-16T20:00:00Z",
-        "data_delay_h": 24.7,
+        "data_delay_h": 27.2,
         "shadow_forecasts": 217,
         "new_forecasts": 0,
         "new_skips": 0,
