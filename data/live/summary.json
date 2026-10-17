@@ -1,69 +1,64 @@
 {
-  "generated_utc": "2026-10-17T00:34:34Z",
+  "generated_utc": "2026-10-17T05:40:32Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-15T23:00:00Z",
-        "data_delay_h": 25.6,
-        "shadow_forecasts": 157,
-        "new_forecasts": 0,
+        "latest_obs_utc": "2026-10-16T21:00:00Z",
+        "data_delay_h": 8.7,
+        "shadow_forecasts": 167,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-15T23:00:00Z",
-        "target_utc": "2026-10-16T05:00:00Z",
-        "yhat_F3": 6.506091814008975,
+        "origin_utc": "2026-10-16T21:00:00Z",
+        "target_utc": "2026-10-17T03:00:00Z",
+        "yhat_F3": 6.079184938928779,
         "flag": "ok",
-        "data_delay_h": 8.3
+        "data_delay_h": 8.7
       },
       "scoreboard": {
-        "n_scored": 78,
-        "mae_F3": 3.698,
-        "mae_persistence": 4.821,
+        "n_scored": 84,
+        "mae_F3": 3.536,
+        "mae_persistence": 5.0,
         "n_warn": 11,
-        "n_ok": 66,
+        "n_ok": 72,
         "n_grey": 1,
         "mae_F3_warn": 4.46,
-        "mae_F3_ok": 3.585
+        "mae_F3_ok": 3.406
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-15T23:00:00Z",
-        "data_delay_h": 25.6,
+        "latest_obs_utc": "2026-10-16T23:00:00Z",
+        "data_delay_h": 6.7,
         "shadow_forecasts": 208,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-15T23:00:00Z",
-        "target_utc": "2026-10-16T05:00:00Z",
-        "yhat_F3": 4.03245736093372,
+        "origin_utc": "2026-10-16T23:00:00Z",
+        "target_utc": "2026-10-17T05:00:00Z",
+        "yhat_F3": 3.853198258599383,
         "flag": "ok",
-        "data_delay_h": 8.3
+        "data_delay_h": 6.7
       },
       "scoreboard": {
-        "n_scored": 93,
-        "mae_F3": 2.166,
-        "mae_persistence": 2.309,
+        "n_scored": 99,
+        "mae_F3": 2.104,
+        "mae_persistence": 2.223,
         "n_warn": 17,
-        "n_ok": 76,
+        "n_ok": 82,
         "n_grey": 0,
         "mae_F3_warn": 2.618,
-        "mae_F3_ok": 2.065
+        "mae_F3_ok": 1.998
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-15T23:00:00Z",
-        "data_delay_h": 25.6,
-        "shadow_forecasts": 208,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-10-15T23:00:00Z",
@@ -85,24 +80,29 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "latest_obs_utc": "2026-10-16T20:00:00Z",
+        "data_delay_h": 9.7,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-13T20:00:00Z",
-        "target_utc": "2026-10-14T02:00:00Z",
-        "yhat_F3": 5.810217275782708,
+        "origin_utc": "2026-10-16T20:00:00Z",
+        "target_utc": "2026-10-17T02:00:00Z",
+        "yhat_F3": 3.1557463798562653,
         "flag": "ok",
-        "data_delay_h": 6.0
+        "data_delay_h": 9.7
       },
       "scoreboard": {
-        "n_scored": 72,
-        "mae_F3": 2.074,
-        "mae_persistence": 2.323,
+        "n_scored": 78,
+        "mae_F3": 1.989,
+        "mae_persistence": 2.25,
         "n_warn": 1,
-        "n_ok": 71,
+        "n_ok": 77,
         "n_grey": 0,
         "mae_F3_warn": 2.396,
-        "mae_F3_ok": 2.07
+        "mae_F3_ok": 1.983
       }
     }
   },
