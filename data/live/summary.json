@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-10-20T01:54:39Z",
+  "generated_utc": "2026-10-20T07:43:20Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-10-19T23:00:00Z",
-        "data_delay_h": 2.9,
+        "data_delay_h": 8.7,
         "shadow_forecasts": 208,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-19T23:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-10-19T23:00:00Z",
-        "data_delay_h": 2.9,
+        "data_delay_h": 8.7,
         "shadow_forecasts": 208,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-10-19T23:00:00Z",
@@ -58,12 +58,7 @@
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-19T23:00:00Z",
-        "data_delay_h": 2.9,
-        "shadow_forecasts": 208,
-        "new_forecasts": 6,
-        "new_skips": 0,
-        "new_scores": 6
+        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-10-19T23:00:00Z",
@@ -85,24 +80,29 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "latest_obs_utc": "2026-10-19T20:00:00Z",
+        "data_delay_h": 11.7,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-18T20:00:00Z",
-        "target_utc": "2026-10-19T02:00:00Z",
-        "yhat_F3": 3.0935577561540577,
+        "origin_utc": "2026-10-19T20:00:00Z",
+        "target_utc": "2026-10-20T02:00:00Z",
+        "yhat_F3": 9.188565356798474,
         "flag": "ok",
-        "data_delay_h": 14.9
+        "data_delay_h": 11.7
       },
       "scoreboard": {
-        "n_scored": 90,
-        "mae_F3": 1.822,
-        "mae_persistence": 2.002,
+        "n_scored": 96,
+        "mae_F3": 1.754,
+        "mae_persistence": 1.946,
         "n_warn": 1,
-        "n_ok": 89,
+        "n_ok": 95,
         "n_grey": 0,
         "mae_F3_warn": 2.396,
-        "mae_F3_ok": 1.815
+        "mae_F3_ok": 1.747
       }
     }
   },
