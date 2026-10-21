@@ -1,15 +1,10 @@
 {
-  "generated_utc": "2026-10-21T13:55:35Z",
+  "generated_utc": "2026-10-21T18:44:47Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-20T23:00:00Z",
-        "data_delay_h": 14.9,
-        "shadow_forecasts": 208,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "NotImplementedError: Unknown file format"
       },
       "latest": {
         "origin_utc": "2026-10-20T23:00:00Z",
@@ -31,12 +26,7 @@
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-20T23:00:00Z",
-        "data_delay_h": 14.9,
-        "shadow_forecasts": 208,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "NotImplementedError: Unknown file format"
       },
       "latest": {
         "origin_utc": "2026-10-20T23:00:00Z",
@@ -58,12 +48,7 @@
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-10-20T21:00:00Z",
-        "data_delay_h": 16.9,
-        "shadow_forecasts": 208,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "NotImplementedError: Unknown file format"
       },
       "latest": {
         "origin_utc": "2026-10-20T21:00:00Z",
@@ -85,7 +70,7 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "error": "NotImplementedError: Unknown file format"
       },
       "latest": {
         "origin_utc": "2026-10-19T20:00:00Z",
