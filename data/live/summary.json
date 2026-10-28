@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-10-28T13:11:09Z",
+  "generated_utc": "2026-10-28T18:55:23Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "error": "HTTPError: HTTP Error 504: Gateway Timeout"
       },
       "latest": {
         "origin_utc": "2026-10-20T23:00:00Z",
@@ -26,7 +26,7 @@
     },
     "KC1": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "error": "HTTPError: HTTP Error 504: Gateway Timeout"
       },
       "latest": {
         "origin_utc": "2026-10-20T23:00:00Z",
@@ -48,7 +48,7 @@
     },
     "BEX": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "error": "HTTPError: HTTP Error 504: Gateway Timeout"
       },
       "latest": {
         "origin_utc": "2026-10-20T21:00:00Z",
@@ -70,7 +70,7 @@
     },
     "HRL": {
       "run_status": {
-        "error": "NotImplementedError: Unknown file format"
+        "error": "HTTPError: HTTP Error 504: Gateway Timeout"
       },
       "latest": {
         "origin_utc": "2026-10-19T20:00:00Z",
