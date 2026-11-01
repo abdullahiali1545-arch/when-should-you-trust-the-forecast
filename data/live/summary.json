@@ -1,91 +1,91 @@
 {
-  "generated_utc": "2026-10-31T23:28:35Z",
+  "generated_utc": "2026-11-01T06:22:45Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-30T21:00:00Z",
-        "data_delay_h": 26.5,
+        "latest_obs_utc": "2026-10-31T23:00:00Z",
+        "data_delay_h": 7.4,
         "shadow_forecasts": 208,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-30T21:00:00Z",
-        "target_utc": "2026-10-31T03:00:00Z",
-        "yhat_F3": 15.421540345958135,
-        "flag": "ok",
-        "data_delay_h": 5.5
+        "origin_utc": "2026-10-31T23:00:00Z",
+        "target_utc": "2026-11-01T05:00:00Z",
+        "yhat_F3": 29.06669982112518,
+        "flag": "warn",
+        "data_delay_h": 7.4
       },
       "scoreboard": {
-        "n_scored": 126,
-        "mae_F3": 3.751,
-        "mae_persistence": 5.016,
-        "n_warn": 17,
-        "n_ok": 108,
+        "n_scored": 132,
+        "mae_F3": 4.103,
+        "mae_persistence": 5.333,
+        "n_warn": 19,
+        "n_ok": 112,
         "n_grey": 1,
-        "mae_F3_warn": 4.409,
-        "mae_F3_ok": 3.657
+        "mae_F3_warn": 4.642,
+        "mae_F3_ok": 4.023
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-10-30T23:00:00Z",
-        "data_delay_h": 24.5,
+        "latest_obs_utc": "2026-10-31T23:00:00Z",
+        "data_delay_h": 7.4,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-30T23:00:00Z",
-        "target_utc": "2026-10-31T05:00:00Z",
-        "yhat_F3": 18.10120766170769,
-        "flag": "ok",
-        "data_delay_h": 3.5
+        "origin_utc": "2026-10-31T23:00:00Z",
+        "target_utc": "2026-11-01T05:00:00Z",
+        "yhat_F3": 20.59264213757121,
+        "flag": "warn",
+        "data_delay_h": 7.4
       },
       "scoreboard": {
-        "n_scored": 141,
-        "mae_F3": 2.358,
-        "mae_persistence": 2.478,
+        "n_scored": 147,
+        "mae_F3": 2.399,
+        "mae_persistence": 2.537,
         "n_warn": 23,
-        "n_ok": 118,
+        "n_ok": 124,
         "n_grey": 0,
         "mae_F3_warn": 2.85,
-        "mae_F3_ok": 2.262
+        "mae_F3_ok": 2.316
       }
     },
     "BEX": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+        "latest_obs_utc": "2026-10-31T23:00:00Z",
+        "data_delay_h": 7.4,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-10-30T22:00:00Z",
-        "target_utc": "2026-10-31T04:00:00Z",
-        "yhat_F3": 14.4691839364026,
+        "origin_utc": "2026-10-31T23:00:00Z",
+        "target_utc": "2026-11-01T05:00:00Z",
+        "yhat_F3": 26.05429179784807,
         "flag": "warn",
-        "data_delay_h": 17.8
+        "data_delay_h": 7.4
       },
       "scoreboard": {
-        "n_scored": 142,
-        "mae_F3": 2.728,
-        "mae_persistence": 3.162,
-        "n_warn": 12,
+        "n_scored": 148,
+        "mae_F3": 2.72,
+        "mae_persistence": 3.31,
+        "n_warn": 18,
         "n_ok": 130,
         "n_grey": 0,
-        "mae_F3_warn": 7.436,
+        "mae_F3_warn": 5.8,
         "mae_F3_ok": 2.293
       }
     },
     "HRL": {
       "run_status": {
-        "latest_obs_utc": "2026-10-30T20:00:00Z",
-        "data_delay_h": 27.5,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-10-30T20:00:00Z",
