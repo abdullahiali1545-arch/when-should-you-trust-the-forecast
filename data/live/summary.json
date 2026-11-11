@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-11-11T15:23:43Z",
+  "generated_utc": "2026-11-11T22:47:02Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-10T23:00:00Z",
-        "data_delay_h": 16.4,
+        "data_delay_h": 23.8,
         "shadow_forecasts": 217,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -32,7 +32,7 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-10T23:00:00Z",
-        "data_delay_h": 16.4,
+        "data_delay_h": 23.8,
         "shadow_forecasts": 217,
         "new_forecasts": 0,
         "new_skips": 0,
@@ -58,12 +58,7 @@
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-11-10T22:00:00Z",
-        "data_delay_h": 17.4,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-10T22:00:00Z",
@@ -85,23 +80,28 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+        "latest_obs_utc": "2026-11-10T20:00:00Z",
+        "data_delay_h": 26.8,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-09T20:00:00Z",
-        "target_utc": "2026-11-10T02:00:00Z",
-        "yhat_F3": 24.52209774091008,
+        "origin_utc": "2026-11-10T20:00:00Z",
+        "target_utc": "2026-11-11T02:00:00Z",
+        "yhat_F3": 16.55545407882365,
         "flag": "warn",
-        "data_delay_h": 21.9
+        "data_delay_h": 26.8
       },
       "scoreboard": {
-        "n_scored": 156,
-        "mae_F3": 14.637,
-        "mae_persistence": 14.676,
-        "n_warn": 37,
+        "n_scored": 162,
+        "mae_F3": 14.287,
+        "mae_persistence": 14.345,
+        "n_warn": 43,
         "n_ok": 119,
         "n_grey": 0,
-        "mae_F3_warn": 53.926,
+        "mae_F3_warn": 47.124,
         "mae_F3_ok": 2.421
       }
     }
