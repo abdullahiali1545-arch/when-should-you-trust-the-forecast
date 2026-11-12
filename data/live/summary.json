@@ -1,91 +1,91 @@
 {
-  "generated_utc": "2026-11-11T22:47:02Z",
+  "generated_utc": "2026-11-12T03:53:42Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-10T23:00:00Z",
-        "data_delay_h": 23.8,
+        "latest_obs_utc": "2026-11-11T23:00:00Z",
+        "data_delay_h": 4.9,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-10T23:00:00Z",
-        "target_utc": "2026-11-11T05:00:00Z",
-        "yhat_F3": 19.698085384018764,
+        "origin_utc": "2026-11-11T23:00:00Z",
+        "target_utc": "2026-11-12T05:00:00Z",
+        "yhat_F3": 6.457844911343957,
         "flag": "warn",
-        "data_delay_h": 7.7
+        "data_delay_h": 4.9
       },
       "scoreboard": {
-        "n_scored": 192,
-        "mae_F3": 7.469,
-        "mae_persistence": 7.943,
-        "n_warn": 64,
+        "n_scored": 198,
+        "mae_F3": 7.511,
+        "mae_persistence": 8.02,
+        "n_warn": 70,
         "n_ok": 127,
         "n_grey": 1,
-        "mae_F3_warn": 14.225,
+        "mae_F3_warn": 13.765,
         "mae_F3_ok": 4.101
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-10T23:00:00Z",
-        "data_delay_h": 23.8,
+        "latest_obs_utc": "2026-11-11T23:00:00Z",
+        "data_delay_h": 4.9,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-10T23:00:00Z",
-        "target_utc": "2026-11-11T05:00:00Z",
-        "yhat_F3": 21.001141979937785,
+        "origin_utc": "2026-11-11T23:00:00Z",
+        "target_utc": "2026-11-12T05:00:00Z",
+        "yhat_F3": 5.956736012506731,
         "flag": "warn",
-        "data_delay_h": 7.7
+        "data_delay_h": 4.9
       },
       "scoreboard": {
-        "n_scored": 207,
-        "mae_F3": 5.369,
-        "mae_persistence": 5.402,
-        "n_warn": 70,
+        "n_scored": 213,
+        "mae_F3": 5.447,
+        "mae_persistence": 5.5,
+        "n_warn": 76,
         "n_ok": 137,
         "n_grey": 0,
-        "mae_F3_warn": 11.135,
+        "mae_F3_warn": 10.9,
         "mae_F3_ok": 2.422
       }
     },
     "BEX": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
-      },
-      "latest": {
-        "origin_utc": "2026-11-10T22:00:00Z",
-        "target_utc": "2026-11-11T04:00:00Z",
-        "yhat_F3": 19.36712105752592,
-        "flag": "ok",
-        "data_delay_h": 8.7
-      },
-      "scoreboard": {
-        "n_scored": 202,
-        "mae_F3": 6.166,
-        "mae_persistence": 6.876,
-        "n_warn": 57,
-        "n_ok": 145,
-        "n_grey": 0,
-        "mae_F3_warn": 14.873,
-        "mae_F3_ok": 2.744
-      }
-    },
-    "HRL": {
-      "run_status": {
-        "latest_obs_utc": "2026-11-10T20:00:00Z",
-        "data_delay_h": 26.8,
+        "latest_obs_utc": "2026-11-11T23:00:00Z",
+        "data_delay_h": 4.9,
         "shadow_forecasts": 217,
         "new_forecasts": 6,
         "new_skips": 0,
         "new_scores": 6
+      },
+      "latest": {
+        "origin_utc": "2026-11-11T23:00:00Z",
+        "target_utc": "2026-11-12T05:00:00Z",
+        "yhat_F3": 9.038213417153274,
+        "flag": "ok",
+        "data_delay_h": 4.9
+      },
+      "scoreboard": {
+        "n_scored": 208,
+        "mae_F3": 6.035,
+        "mae_persistence": 6.739,
+        "n_warn": 59,
+        "n_ok": 149,
+        "n_grey": 0,
+        "mae_F3_warn": 14.435,
+        "mae_F3_ok": 2.709
+      }
+    },
+    "HRL": {
+      "run_status": {
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-10T20:00:00Z",
