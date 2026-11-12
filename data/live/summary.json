@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-11-12T03:53:42Z",
+  "generated_utc": "2026-11-12T12:54:03Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-11T23:00:00Z",
-        "data_delay_h": 4.9,
+        "data_delay_h": 13.9,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-11T23:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-11T23:00:00Z",
-        "data_delay_h": 4.9,
+        "data_delay_h": 13.9,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-11T23:00:00Z",
@@ -58,12 +58,7 @@
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-11-11T23:00:00Z",
-        "data_delay_h": 4.9,
-        "shadow_forecasts": 217,
-        "new_forecasts": 6,
-        "new_skips": 0,
-        "new_scores": 6
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-11T23:00:00Z",
@@ -85,23 +80,28 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+        "latest_obs_utc": "2026-11-11T20:00:00Z",
+        "data_delay_h": 16.9,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-10T20:00:00Z",
-        "target_utc": "2026-11-11T02:00:00Z",
-        "yhat_F3": 16.55545407882365,
-        "flag": "warn",
-        "data_delay_h": 26.8
+        "origin_utc": "2026-11-11T20:00:00Z",
+        "target_utc": "2026-11-12T02:00:00Z",
+        "yhat_F3": 11.860342051039616,
+        "flag": "ok",
+        "data_delay_h": 16.9
       },
       "scoreboard": {
-        "n_scored": 162,
-        "mae_F3": 14.287,
-        "mae_persistence": 14.345,
-        "n_warn": 43,
+        "n_scored": 168,
+        "mae_F3": 13.88,
+        "mae_persistence": 14.011,
+        "n_warn": 49,
         "n_ok": 119,
         "n_grey": 0,
-        "mae_F3_warn": 47.124,
+        "mae_F3_warn": 41.708,
         "mae_F3_ok": 2.421
       }
     }
