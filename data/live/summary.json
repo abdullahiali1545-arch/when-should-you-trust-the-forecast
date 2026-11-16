@@ -1,85 +1,85 @@
 {
-  "generated_utc": "2026-11-15T22:57:19Z",
+  "generated_utc": "2026-11-16T02:50:35Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-14T23:00:00Z",
-        "data_delay_h": 24.0,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "latest_obs_utc": "2026-11-15T23:00:00Z",
+        "data_delay_h": 3.8,
+        "shadow_forecasts": 215,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-14T23:00:00Z",
-        "target_utc": "2026-11-15T05:00:00Z",
-        "yhat_F3": 12.569371755017512,
-        "flag": "warn",
+        "origin_utc": "2026-11-15T23:00:00Z",
+        "target_utc": "2026-11-16T05:00:00Z",
+        "yhat_F3": 7.406014102285784,
+        "flag": "ok",
         "data_delay_h": 3.8
       },
       "scoreboard": {
-        "n_scored": 216,
-        "mae_F3": 7.782,
-        "mae_persistence": 8.116,
-        "n_warn": 81,
+        "n_scored": 222,
+        "mae_F3": 7.702,
+        "mae_persistence": 8.045,
+        "n_warn": 87,
         "n_ok": 134,
         "n_grey": 1,
-        "mae_F3_warn": 12.954,
+        "mae_F3_warn": 12.392,
         "mae_F3_ok": 4.694
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-14T23:00:00Z",
-        "data_delay_h": 24.0,
+        "latest_obs_utc": "2026-11-15T23:00:00Z",
+        "data_delay_h": 3.8,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-14T23:00:00Z",
-        "target_utc": "2026-11-15T05:00:00Z",
-        "yhat_F3": 12.33013022241149,
-        "flag": "warn",
+        "origin_utc": "2026-11-15T23:00:00Z",
+        "target_utc": "2026-11-16T05:00:00Z",
+        "yhat_F3": 5.392534916091976,
+        "flag": "ok",
         "data_delay_h": 3.8
       },
       "scoreboard": {
-        "n_scored": 231,
-        "mae_F3": 5.439,
-        "mae_persistence": 5.377,
-        "n_warn": 90,
+        "n_scored": 237,
+        "mae_F3": 5.357,
+        "mae_persistence": 5.322,
+        "n_warn": 96,
         "n_ok": 141,
         "n_grey": 0,
-        "mae_F3_warn": 9.735,
+        "mae_F3_warn": 9.264,
         "mae_F3_ok": 2.697
       }
     },
     "BEX": {
       "run_status": {
-        "latest_obs_utc": "2026-11-14T23:00:00Z",
-        "data_delay_h": 24.0,
+        "latest_obs_utc": "2026-11-15T23:00:00Z",
+        "data_delay_h": 3.8,
         "shadow_forecasts": 217,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-14T23:00:00Z",
-        "target_utc": "2026-11-15T05:00:00Z",
-        "yhat_F3": 16.623615853675158,
-        "flag": "warn",
-        "data_delay_h": 12.2
+        "origin_utc": "2026-11-15T23:00:00Z",
+        "target_utc": "2026-11-16T05:00:00Z",
+        "yhat_F3": 5.500670051505638,
+        "flag": "ok",
+        "data_delay_h": 3.8
       },
       "scoreboard": {
-        "n_scored": 226,
-        "mae_F3": 5.805,
-        "mae_persistence": 6.56,
-        "n_warn": 65,
+        "n_scored": 232,
+        "mae_F3": 5.741,
+        "mae_persistence": 6.647,
+        "n_warn": 71,
         "n_ok": 161,
         "n_grey": 0,
-        "mae_F3_warn": 13.265,
+        "mae_F3_warn": 12.425,
         "mae_F3_ok": 2.793
       }
     },
