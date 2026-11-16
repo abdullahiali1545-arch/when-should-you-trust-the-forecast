@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-11-16T02:50:35Z",
+  "generated_utc": "2026-11-16T11:41:45Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-15T23:00:00Z",
-        "data_delay_h": 3.8,
+        "data_delay_h": 12.7,
         "shadow_forecasts": 215,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-15T23:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-15T23:00:00Z",
-        "data_delay_h": 3.8,
+        "data_delay_h": 12.7,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-15T23:00:00Z",
@@ -59,11 +59,11 @@
     "BEX": {
       "run_status": {
         "latest_obs_utc": "2026-11-15T23:00:00Z",
-        "data_delay_h": 3.8,
+        "data_delay_h": 12.7,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-15T23:00:00Z",
@@ -85,23 +85,28 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+        "latest_obs_utc": "2026-11-15T20:00:00Z",
+        "data_delay_h": 15.7,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-14T20:00:00Z",
-        "target_utc": "2026-11-15T02:00:00Z",
-        "yhat_F3": 13.572448716814788,
-        "flag": "warn",
-        "data_delay_h": 6.8
+        "origin_utc": "2026-11-15T20:00:00Z",
+        "target_utc": "2026-11-16T02:00:00Z",
+        "yhat_F3": 3.168161027689216,
+        "flag": "ok",
+        "data_delay_h": 15.7
       },
       "scoreboard": {
-        "n_scored": 186,
-        "mae_F3": 12.977,
-        "mae_persistence": 13.158,
-        "n_warn": 57,
+        "n_scored": 192,
+        "mae_F3": 12.695,
+        "mae_persistence": 12.918,
+        "n_warn": 63,
         "n_ok": 129,
         "n_grey": 0,
-        "mae_F3_warn": 36.257,
+        "mae_F3_warn": 33.18,
         "mae_F3_ok": 2.69
       }
     }
