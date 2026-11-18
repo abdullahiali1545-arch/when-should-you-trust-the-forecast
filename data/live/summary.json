@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-11-18T04:31:53Z",
+  "generated_utc": "2026-11-18T14:14:22Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-17T23:00:00Z",
-        "data_delay_h": 5.5,
+        "data_delay_h": 15.2,
         "shadow_forecasts": 215,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-17T23:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-17T23:00:00Z",
-        "data_delay_h": 5.5,
+        "data_delay_h": 15.2,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-17T23:00:00Z",
@@ -59,11 +59,11 @@
     "BEX": {
       "run_status": {
         "latest_obs_utc": "2026-11-17T20:00:00Z",
-        "data_delay_h": 8.5,
+        "data_delay_h": 18.2,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-17T20:00:00Z",
@@ -85,24 +85,29 @@
     },
     "HRL": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+        "latest_obs_utc": "2026-11-17T20:00:00Z",
+        "data_delay_h": 18.2,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-16T20:00:00Z",
-        "target_utc": "2026-11-17T02:00:00Z",
-        "yhat_F3": 5.362193245740511,
+        "origin_utc": "2026-11-17T20:00:00Z",
+        "target_utc": "2026-11-18T02:00:00Z",
+        "yhat_F3": 3.124278343247773,
         "flag": "ok",
-        "data_delay_h": 8.6
+        "data_delay_h": 18.2
       },
       "scoreboard": {
-        "n_scored": 198,
-        "mae_F3": 12.343,
-        "mae_persistence": 12.57,
+        "n_scored": 204,
+        "mae_F3": 12.108,
+        "mae_persistence": 12.315,
         "n_warn": 67,
-        "n_ok": 131,
+        "n_ok": 137,
         "n_grey": 0,
         "mae_F3_warn": 31.266,
-        "mae_F3_ok": 2.664
+        "mae_F3_ok": 2.738
       }
     }
   },
