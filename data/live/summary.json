@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-11-19T03:39:16Z",
+  "generated_utc": "2026-11-19T13:27:58Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-18T22:00:00Z",
-        "data_delay_h": 5.7,
+        "data_delay_h": 15.5,
         "shadow_forecasts": 215,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-18T22:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-18T23:00:00Z",
-        "data_delay_h": 4.7,
+        "data_delay_h": 14.5,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-18T23:00:00Z",
@@ -59,11 +59,11 @@
     "BEX": {
       "run_status": {
         "latest_obs_utc": "2026-11-18T23:00:00Z",
-        "data_delay_h": 4.7,
+        "data_delay_h": 14.5,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-18T23:00:00Z",
@@ -85,12 +85,7 @@
     },
     "HRL": {
       "run_status": {
-        "latest_obs_utc": "2026-11-18T20:00:00Z",
-        "data_delay_h": 7.7,
-        "shadow_forecasts": 217,
-        "new_forecasts": 6,
-        "new_skips": 0,
-        "new_scores": 6
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-18T20:00:00Z",
