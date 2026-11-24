@@ -1,96 +1,91 @@
 {
-  "generated_utc": "2026-11-23T14:54:02Z",
+  "generated_utc": "2026-11-24T02:19:06Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-22T05:00:00Z",
-        "data_delay_h": 33.9,
+        "latest_obs_utc": "2026-11-23T23:00:00Z",
+        "data_delay_h": 3.3,
         "shadow_forecasts": 206,
-        "new_forecasts": 0,
+        "new_forecasts": 6,
         "new_skips": 0,
-        "new_scores": 0
+        "new_scores": 6
       },
       "latest": {
-        "origin_utc": "2026-11-22T05:00:00Z",
-        "target_utc": "2026-11-22T11:00:00Z",
-        "yhat_F3": 12.98950709410868,
-        "flag": "ok",
-        "data_delay_h": 22.8
+        "origin_utc": "2026-11-23T23:00:00Z",
+        "target_utc": "2026-11-24T05:00:00Z",
+        "yhat_F3": 16.27598892708563,
+        "flag": "warn",
+        "data_delay_h": 3.3
       },
       "scoreboard": {
-        "n_scored": 264,
-        "mae_F3": 7.079,
-        "mae_persistence": 7.686,
+        "n_scored": 270,
+        "mae_F3": 7.022,
+        "mae_persistence": 7.626,
         "n_warn": 96,
-        "n_ok": 167,
+        "n_ok": 173,
         "n_grey": 1,
         "mae_F3_warn": 11.452,
-        "mae_F3_ok": 4.592
+        "mae_F3_ok": 4.588
       }
     },
     "KC1": {
       "run_status": {
-        "latest_obs_utc": "2026-11-22T23:00:00Z",
-        "data_delay_h": 15.9,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
-      },
-      "latest": {
-        "origin_utc": "2026-11-22T23:00:00Z",
-        "target_utc": "2026-11-23T05:00:00Z",
-        "yhat_F3": 6.299065103383215,
-        "flag": "ok",
-        "data_delay_h": 4.8
-      },
-      "scoreboard": {
-        "n_scored": 279,
-        "mae_F3": 5.063,
-        "mae_persistence": 5.134,
-        "n_warn": 96,
-        "n_ok": 183,
-        "n_grey": 0,
-        "mae_F3_warn": 9.264,
-        "mae_F3_ok": 2.859
-      }
-    },
-    "BEX": {
-      "run_status": {
-        "latest_obs_utc": "2026-11-22T22:00:00Z",
-        "data_delay_h": 16.9,
-        "shadow_forecasts": 217,
-        "new_forecasts": 0,
-        "new_skips": 0,
-        "new_scores": 0
-      },
-      "latest": {
-        "origin_utc": "2026-11-22T22:00:00Z",
-        "target_utc": "2026-11-23T04:00:00Z",
-        "yhat_F3": 5.762479131568726,
-        "flag": "warn",
-        "data_delay_h": 5.8
-      },
-      "scoreboard": {
-        "n_scored": 274,
-        "mae_F3": 5.635,
-        "mae_persistence": 6.53,
-        "n_warn": 78,
-        "n_ok": 196,
-        "n_grey": 0,
-        "mae_F3_warn": 11.703,
-        "mae_F3_ok": 3.22
-      }
-    },
-    "HRL": {
-      "run_status": {
-        "latest_obs_utc": "2026-11-22T20:00:00Z",
-        "data_delay_h": 18.9,
+        "latest_obs_utc": "2026-11-23T23:00:00Z",
+        "data_delay_h": 3.3,
         "shadow_forecasts": 217,
         "new_forecasts": 6,
         "new_skips": 0,
         "new_scores": 6
+      },
+      "latest": {
+        "origin_utc": "2026-11-23T23:00:00Z",
+        "target_utc": "2026-11-24T05:00:00Z",
+        "yhat_F3": 11.52786493699146,
+        "flag": "ok",
+        "data_delay_h": 3.3
+      },
+      "scoreboard": {
+        "n_scored": 285,
+        "mae_F3": 4.995,
+        "mae_persistence": 5.062,
+        "n_warn": 99,
+        "n_ok": 186,
+        "n_grey": 0,
+        "mae_F3_warn": 9.019,
+        "mae_F3_ok": 2.854
+      }
+    },
+    "BEX": {
+      "run_status": {
+        "latest_obs_utc": "2026-11-23T22:00:00Z",
+        "data_delay_h": 4.3,
+        "shadow_forecasts": 217,
+        "new_forecasts": 6,
+        "new_skips": 0,
+        "new_scores": 6
+      },
+      "latest": {
+        "origin_utc": "2026-11-23T22:00:00Z",
+        "target_utc": "2026-11-24T04:00:00Z",
+        "yhat_F3": 16.2244830249026,
+        "flag": "ok",
+        "data_delay_h": 4.3
+      },
+      "scoreboard": {
+        "n_scored": 280,
+        "mae_F3": 5.559,
+        "mae_persistence": 6.415,
+        "n_warn": 82,
+        "n_ok": 198,
+        "n_grey": 0,
+        "mae_F3_warn": 11.234,
+        "mae_F3_ok": 3.209
+      }
+    },
+    "HRL": {
+      "run_status": {
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-22T20:00:00Z",
