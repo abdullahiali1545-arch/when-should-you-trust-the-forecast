@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-11-27T05:08:07Z",
+  "generated_utc": "2026-11-27T15:15:17Z",
   "note": "Descriptive only until 26 weeks incl. a full Jan-Mar (PROJECT_SPEC 2026-09-29).",
   "stations": {
     "MY1": {
       "run_status": {
         "latest_obs_utc": "2026-11-26T22:00:00Z",
-        "data_delay_h": 7.1,
+        "data_delay_h": 17.3,
         "shadow_forecasts": 208,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-26T22:00:00Z",
@@ -32,11 +32,11 @@
     "KC1": {
       "run_status": {
         "latest_obs_utc": "2026-11-26T23:00:00Z",
-        "data_delay_h": 6.1,
+        "data_delay_h": 16.3,
         "shadow_forecasts": 217,
-        "new_forecasts": 6,
+        "new_forecasts": 0,
         "new_skips": 0,
-        "new_scores": 6
+        "new_scores": 0
       },
       "latest": {
         "origin_utc": "2026-11-26T23:00:00Z",
@@ -58,34 +58,34 @@
     },
     "BEX": {
       "run_status": {
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
-      },
-      "latest": {
-        "origin_utc": "2026-11-25T22:00:00Z",
-        "target_utc": "2026-11-26T04:00:00Z",
-        "yhat_F3": 17.685987881732526,
-        "flag": "ok",
-        "data_delay_h": 4.9
-      },
-      "scoreboard": {
-        "n_scored": 292,
-        "mae_F3": 5.493,
-        "mae_persistence": 6.291,
-        "n_warn": 82,
-        "n_ok": 210,
-        "n_grey": 0,
-        "mae_F3_warn": 11.234,
-        "mae_F3_ok": 3.251
-      }
-    },
-    "HRL": {
-      "run_status": {
-        "latest_obs_utc": "2026-11-26T20:00:00Z",
-        "data_delay_h": 9.1,
+        "latest_obs_utc": "2026-11-26T21:00:00Z",
+        "data_delay_h": 18.3,
         "shadow_forecasts": 217,
         "new_forecasts": 6,
         "new_skips": 0,
         "new_scores": 6
+      },
+      "latest": {
+        "origin_utc": "2026-11-26T21:00:00Z",
+        "target_utc": "2026-11-27T03:00:00Z",
+        "yhat_F3": 18.778748548170693,
+        "flag": "ok",
+        "data_delay_h": 18.3
+      },
+      "scoreboard": {
+        "n_scored": 298,
+        "mae_F3": 5.439,
+        "mae_persistence": 6.224,
+        "n_warn": 82,
+        "n_ok": 216,
+        "n_grey": 0,
+        "mae_F3_warn": 11.234,
+        "mae_F3_ok": 3.24
+      }
+    },
+    "HRL": {
+      "run_status": {
+        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
       },
       "latest": {
         "origin_utc": "2026-11-26T20:00:00Z",
